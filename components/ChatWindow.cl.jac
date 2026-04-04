@@ -49,8 +49,9 @@ def:pub ChatWindow(
                 rows={2}
             />
             <button
+                type="button"
                 className="btn btn--primary"
-                onClick={lambda e: any -> None { onSend(); }}
+                onClick={onSend}
                 disabled={sending or draft.trim() == ""}
             >
                 Send
@@ -59,16 +60,16 @@ def:pub ChatWindow(
 
         <div className="demo-bar">
             <span>Demo cases:</span>
-            <button className="btn btn--secondary btn--sm" onClick={lambda e: any -> None { onDemo(1); }} disabled={sending}>
+            <button type="button" className="btn btn--secondary btn--sm" onClick={lambda -> None { onDemo(1); }} disabled={sending}>
                 Case 1 (Dizziness)
             </button>
-            <button className="btn btn--secondary btn--sm" onClick={lambda e: any -> None { onDemo(2); }} disabled={sending}>
+            <button type="button" className="btn btn--secondary btn--sm" onClick={lambda -> None { onDemo(2); }} disabled={sending}>
                 Case 2 (Nausea)
             </button>
-            <button className="btn btn--crisis btn--sm" onClick={lambda e: any -> None { onDemo(3); }} disabled={sending}>
+            <button type="button" className="btn btn--crisis btn--sm" onClick={lambda -> None { onDemo(3); }} disabled={sending}>
                 Case 3 (Crisis)
             </button>
-            <button className="btn btn--secondary btn--sm" style={{"marginLeft": "auto"}} onClick={lambda e: any -> None { onReset(); }} disabled={sending}>
+            <button type="button" className="btn btn--secondary btn--sm" style={{"marginLeft": "auto"}} onClick={onReset} disabled={sending}>
                 New Session
             </button>
         </div>

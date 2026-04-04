@@ -1,6 +1,6 @@
 """Care Anchor package root."""
 
-import from care_anchor.agents.orchestrator {
+import from agents.orchestrator {
     create_session,
     process_message,
     get_session,

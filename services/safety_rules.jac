@@ -1,6 +1,6 @@
 """Crisis phrase matching — no LLM, no network, always fast."""
 
-import from ..models.session { InterventionDecision }
+import from models.session { InterventionDecision }
 import from .common { normalize_text }
 
 glob CRISIS_PHRASES: list[str] = [

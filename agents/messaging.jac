@@ -1,8 +1,9 @@
 """Messaging agent — formats the final user-facing reply."""
 
-import from ..models.session { UserSession, DiagnosisResult, CareSummary }
-import from ..models.codes { DiagnosisCode }
-import from ..models.provider { ProviderOption }
+import from os { getenv }
+import from models.session { UserSession, DiagnosisResult, CareSummary }
+import from models.codes { DiagnosisCode }
+import from models.provider { ProviderOption }
 
 glob LLM_READY: bool = True;
 

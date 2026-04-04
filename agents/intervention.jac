@@ -1,7 +1,7 @@
 """Intervention agent — crisis detection and state management."""
 
-import from ..models.session { UserSession, InterventionDecision }
-import from ..services.safety_rules { detect_crisis, detect_resume }
+import from models.session { UserSession, InterventionDecision }
+import from services.safety_rules { detect_crisis, detect_resume }
 
 def run_intervention_agent(session: UserSession, message: str) -> dict {
     decision = detect_crisis(message);

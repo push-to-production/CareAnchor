@@ -1,9 +1,9 @@
 """Public walkers — POST /walker/<Name> endpoints."""
 
-import from ..models.session {
+import from models.session {
     UserSession, append_message, session_to_dict, update_session_timestamp
 }
-import from ..services.common { new_session_id, iso_now }
+import from services.common { new_session_id, iso_now }
 import from .conversation { minimum_fields_ready, run_conversation_agent }
 import from .intervention { run_intervention_agent, try_resume_from_intervention }
 import from .calling { run_calling_agent, build_calling_follow_up }
@@ -12,7 +12,8 @@ import from .messaging { run_messaging_agent }
 import from .summary { run_summary_agent }
 
 def find_session(sid: str) -> UserSession | None {
-    sessions = [-->](?:UserSession, session_id == sid);
+    anchor = root();
+    sessions = [candidate for candidate in [anchor -->](?:UserSession) if candidate.session_id == sid];
     if sessions { return sessions[0]; }
     return None;
 }
@@ -122,7 +123,7 @@ walker :pub export_json {
             report {"error": "Session not found"};
             disengage;
         }
-        import from ..services.json_exporter { write_session_json }
+        import from services.json_exporter { write_session_json }
         path = write_session_json(session);
         commit();
         report {"file_path": path, "session_id": self.session_id};
@@ -138,7 +139,7 @@ walker :pub export_pdf {
             report {"error": "Session not found"};
             disengage;
         }
-        import from ..services.pdf_exporter { write_session_pdf }
+        import from services.pdf_exporter { write_session_pdf }
         path = write_session_pdf(session);
         commit();
         report {"file_path": path, "session_id": self.session_id};

@@ -1,7 +1,7 @@
 """Conversation agent — symptom and field extraction."""
 
-import from ..models.session { UserSession, ConversationStateUpdate }
-import from ..services.transcript_parser { build_conversation_state_update }
+import from models.session { UserSession, ConversationStateUpdate }
+import from services.transcript_parser { build_conversation_state_update }
 
 def run_conversation_agent(session: UserSession, message: str) -> ConversationStateUpdate {
     session.active_agent = "Conversation Agent";

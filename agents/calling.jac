@@ -1,7 +1,7 @@
 """Calling agent — verifies readiness for provider search."""
 
-import from ..models.session { UserSession, CallingPreparation }
-import from ..services.provider_matcher { normalize_insurance }
+import from models.session { UserSession, CallingPreparation }
+import from services.provider_matcher { normalize_insurance }
 
 def run_calling_agent(session: UserSession) -> CallingPreparation {
     session.agent_path.append("Calling Agent:active");
