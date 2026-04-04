@@ -1,0 +1,34 @@
+[project]
+name = "care_anchor"
+version = "0.1.0"
+description = "Care Anchor — AI triage and provider matching"
+entry-point = "main.jac"
+
+[dependencies]
+python-dotenv = ">=1.0.0"
+requests = ">=2.31.0"
+reportlab = ">=4.0.0"
+twilio = ">=9.0.0"
+
+[dependencies.npm]
+react = "^18.2.0"
+react-dom = "^18.2.0"
+jac-client-node = "1.0.7"
+
+[dependencies.npm.dev]
+vite = "^6.4.1"
+"@vitejs/plugin-react" = "^4.2.1"
+"@jac-client/dev-deps" = "2.0.0"
+
+[dev-dependencies]
+watchdog = ">=3.0.0"
+
+[serve]
+base_route_app = "app"
+port = 8000
+
+[plugins.client]
+port = 5173
+
+[plugins.byllm]
+model_name = "gpt-4o-mini"

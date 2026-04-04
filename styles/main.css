@@ -1,0 +1,221 @@
+/* ── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --brand:       #1a7f5a;
+  --brand-light: #e8f5f0;
+  --crisis:      #c0392b;
+  --crisis-bg:   #fdecea;
+  --text:        #1c1c1e;
+  --muted:       #6b7280;
+  --border:      #e5e7eb;
+  --surface:     #ffffff;
+  --radius:      8px;
+  --shadow:      0 1px 3px rgba(0,0,0,.10);
+  font-size: 16px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f3f4f6;
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── App Shell ───────────────────────────────────────────── */
+.app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── Hero Header ────────────────────────────────────────── */
+.hero {
+  background: var(--brand);
+  color: #fff;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.brand { font-size: 1.4rem; font-weight: 700; letter-spacing: -.02em; }
+.hero-copy { font-size: .8rem; opacity: .85; max-width: 640px; }
+
+/* ── Crisis Banner ───────────────────────────────────────── */
+.crisis-banner {
+  background: var(--crisis-bg);
+  border-left: 4px solid var(--crisis);
+  color: var(--crisis);
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: .9rem;
+}
+.crisis-banner__flags { font-weight: 400; font-size: .8rem; margin-top: 4px; }
+
+/* ── Error Banner ────────────────────────────────────────── */
+.error-banner {
+  background: #fff3cd;
+  border-left: 4px solid #e6a817;
+  padding: 10px 24px;
+  font-size: .875rem;
+  color: #7a4f00;
+}
+
+/* ── Workspace Layout ───────────────────────────────────── */
+.workspace {
+  display: flex;
+  flex: 1;
+  gap: 0;
+  height: calc(100vh - 68px);
+  overflow: hidden;
+}
+.workspace__main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.workspace__side {
+  width: 320px;
+  min-width: 280px;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Chat Window ─────────────────────────────────────────── */
+.chat-window { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.chat-feed {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.chat-composer {
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  gap: 8px;
+  background: var(--surface);
+  align-items: flex-end;
+}
+.chat-composer textarea {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: .9rem;
+  resize: none;
+  min-height: 40px;
+  max-height: 120px;
+  font-family: inherit;
+}
+.chat-composer textarea:focus { outline: none; border-color: var(--brand); }
+.demo-bar {
+  border-top: 1px solid var(--border);
+  background: var(--brand-light);
+  padding: 8px 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: .8rem;
+  color: var(--muted);
+}
+
+/* ── Message Bubbles ─────────────────────────────────────── */
+.bubble { max-width: 80%; display: flex; flex-direction: column; gap: 2px; }
+.bubble--user { align-self: flex-end; }
+.bubble--assistant { align-self: flex-start; }
+.bubble__body {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: .9rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.bubble--user .bubble__body { background: var(--brand); color: #fff; border-bottom-right-radius: 2px; }
+.bubble--assistant .bubble__body { background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 2px; }
+.bubble--crisis .bubble__body { background: var(--crisis-bg); border-color: var(--crisis); color: var(--crisis); }
+.bubble__meta { font-size: .7rem; color: var(--muted); padding: 0 4px; }
+
+/* ── Agent Trace ─────────────────────────────────────────── */
+.agent-trace { display: flex; flex-direction: column; gap: 6px; }
+.agent-trace h3 { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.agent-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #f9fafb;
+  border: 1px solid var(--border);
+  font-size: .78rem;
+}
+.agent-pill__dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+}
+.agent-pill--active .agent-pill__dot { background: var(--brand); animation: pulse 1s infinite; }
+.agent-pill--completed .agent-pill__dot { background: #16a34a; }
+.agent-pill--error .agent-pill__dot { background: var(--crisis); }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+
+/* ── Summary Panel ───────────────────────────────────────── */
+.summary-panel { display: flex; flex-direction: column; gap: 12px; }
+.summary-panel h3 { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+.summary-panel__item { font-size: .85rem; color: var(--text); }
+.code-tag {
+  display: inline-block;
+  background: var(--brand-light);
+  color: var(--brand);
+  border: 1px solid var(--brand);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: .75rem;
+  margin: 2px;
+}
+.provider-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.provider-card__name { font-weight: 600; font-size: .85rem; }
+.provider-card__detail { font-size: .78rem; color: var(--muted); }
+.provider-card__badge {
+  font-size: .7rem;
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 4px;
+  padding: 1px 6px;
+  display: inline-block;
+}
+
+/* ── Buttons ────────────────────────────────────────────── */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: .875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.btn:hover { opacity: .88; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn--primary { background: var(--brand); color: #fff; }
+.btn--secondary { background: #f3f4f6; color: var(--text); border: 1px solid var(--border); }
+.btn--crisis { background: var(--crisis); color: #fff; }
+.btn--sm { padding: 5px 10px; font-size: .8rem; }
+
+/* ── Export Buttons ─────────────────────────────────────── */
+.export-buttons { display: flex; flex-direction: column; gap: 8px; }
+.export-status { font-size: .78rem; color: var(--muted); margin-top: 4px; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .workspace { flex-direction: column; height: auto; }
+  .workspace__side { width: 100%; border-left: none; border-top: 1px solid var(--border); }
+  .bubble { max-width: 95%; }
+}
