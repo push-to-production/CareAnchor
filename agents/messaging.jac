@@ -1,11 +1,10 @@
 """Messaging agent — formats the final user-facing reply."""
 
-import from os { getenv }
 import from ..models.session { UserSession, DiagnosisResult, CareSummary }
 import from ..models.codes { DiagnosisCode }
 import from ..models.provider { ProviderOption }
 
-glob LLM_READY: bool = (getenv("OPENAI_API_KEY") or "") != "";
+glob LLM_READY: bool = True;
 
 """Format a concise, empathetic care coordination reply in Markdown.
 Include: a brief summary of what was heard, a section listing the 2-3 most relevant

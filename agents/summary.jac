@@ -1,10 +1,9 @@
 """Summary agent — generates CareSummary and export helpers."""
 
-import from os { getenv }
 import from ..models.session { UserSession, CareSummary }
 import from ..services.common { transcript_excerpt, APP_DISCLAIMER }
 
-glob LLM_READY: bool = (getenv("OPENAI_API_KEY") or "") != "";
+glob LLM_READY: bool = True;
 
 """Write a 3-sentence plain-English care coordination summary for a patient.
 Include: what symptoms were reported, what conditions were identified, and what
