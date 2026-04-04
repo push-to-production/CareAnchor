@@ -1,9 +1,9 @@
 """Diagnosis agent — ICD-10-CM code matching and provider search."""
 
-import from ..models.session { UserSession, DiagnosisResult }
-import from ..services.symptom_mapper { build_diagnosis_result }
-import from ..services.provider_matcher { find_providers }
-import from ..services.common { transcript_excerpt }
+import from models.session { UserSession, DiagnosisResult }
+import from services.symptom_mapper { build_diagnosis_result }
+import from services.provider_matcher { find_providers }
+import from services.common { transcript_excerpt }
 
 def run_diagnosis_agent(session: UserSession) -> DiagnosisResult {
     session.active_agent = "Diagnosis Agent";

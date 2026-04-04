@@ -1,6 +1,6 @@
 """ICD-10-CM code subset for Care Anchor demo."""
 
-import from ..models.codes { DiagnosisCode }
+import from models.codes { DiagnosisCode }
 
 def get_icd_code_library() -> list[DiagnosisCode] {
     return [

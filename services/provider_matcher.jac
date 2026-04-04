@@ -1,8 +1,8 @@
 """Filter mock provider directory by specialty, insurance, and location."""
 
-import from ..models.provider { ProviderOption }
-import from ..models.session { DiagnosisResult }
-import from ..data.mock_providers { get_mock_provider_directory }
+import from models.provider { ProviderOption }
+import from models.session { DiagnosisResult }
+import from data.mock_providers { get_mock_provider_directory }
 
 def normalize_insurance(raw: str) -> str {
     lower = raw.lower().strip();

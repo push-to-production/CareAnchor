@@ -1,9 +1,9 @@
 """Messaging agent — formats the final user-facing reply."""
 
 import from os { getenv }
-import from ..models.session { UserSession, DiagnosisResult, CareSummary }
-import from ..models.codes { DiagnosisCode }
-import from ..models.provider { ProviderOption }
+import from models.session { UserSession, DiagnosisResult, CareSummary }
+import from models.codes { DiagnosisCode }
+import from models.provider { ProviderOption }
 
 glob LLM_READY: bool = (getenv("OPENAI_API_KEY") or "") != "";
 

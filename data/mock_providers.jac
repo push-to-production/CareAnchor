@@ -1,6 +1,6 @@
 """Mock provider directory — used until a real API is wired in."""
 
-import from ..models.provider { ProviderOption }
+import from models.provider { ProviderOption }
 
 def get_mock_provider_directory() -> list[ProviderOption] {
     return [

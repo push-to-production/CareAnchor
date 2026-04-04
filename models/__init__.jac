@@ -1,8 +1,8 @@
 """Care Anchor models package."""
 
-import from care_anchor.models.codes { DiagnosisCode }
-import from care_anchor.models.provider { ProviderOption }
-import from care_anchor.models.session {
+import from models.codes { DiagnosisCode }
+import from models.provider { ProviderOption }
+import from models.session {
     UserSession,
     ChatMessage,
     CareSummary,

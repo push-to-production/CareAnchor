@@ -1,7 +1,7 @@
 """Writes session summary to exports/*.pdf using reportlab."""
 
 import os;
-import from ..models.session { UserSession }
+import from models.session { UserSession }
 import from .common { iso_now, APP_DISCLAIMER }
 
 def write_session_pdf(session: UserSession) -> str {

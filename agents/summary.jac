@@ -1,8 +1,8 @@
 """Summary agent — generates CareSummary and export helpers."""
 
 import from os { getenv }
-import from ..models.session { UserSession, CareSummary }
-import from ..services.common { transcript_excerpt, APP_DISCLAIMER }
+import from models.session { UserSession, CareSummary }
+import from services.common { transcript_excerpt, APP_DISCLAIMER }
 
 glob LLM_READY: bool = (getenv("OPENAI_API_KEY") or "") != "";
 

@@ -2,7 +2,7 @@
 
 import json;
 import os;
-import from ..models.session { UserSession, session_to_dict }
+import from models.session { UserSession, session_to_dict }
 import from .common { iso_now }
 
 def write_session_json(session: UserSession) -> str {

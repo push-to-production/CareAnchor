@@ -2,7 +2,7 @@
 
 import re;
 import from os { getenv }
-import from ..models.session { ConversationStateUpdate }
+import from models.session { ConversationStateUpdate }
 import from .common { first_non_empty, merge_strings, normalize_text, transcript_excerpt }
 import from .symptom_mapper { extract_symptom_keywords, codes_from_keywords }
 

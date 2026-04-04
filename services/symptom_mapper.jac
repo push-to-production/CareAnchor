@@ -1,9 +1,9 @@
 """Keyword-to-ICD mapping with optional LLM enrichment."""
 
 import from os { getenv }
-import from ..models.codes { DiagnosisCode }
-import from ..models.session { DiagnosisResult }
-import from ..data.icd_codes { get_icd_code_library }
+import from models.codes { DiagnosisCode }
+import from models.session { DiagnosisResult }
+import from data.icd_codes { get_icd_code_library }
 
 glob LLM_READY: bool = (getenv("OPENAI_API_KEY") or "") != "";
 

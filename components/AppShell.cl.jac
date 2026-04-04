@@ -169,9 +169,9 @@ def:pub AppShell() -> JsxElement {
                     draft={draft}
                     sending={sending or booting}
                     activeAgent={active_agent}
-                    onDraftChange={lambda value: any -> None { draft = value; }}
+                    onDraftChange={lambda value: str -> None { draft = value; }}
                     onSend={lambda -> None { send_message(); }}
-                    onDemo={lambda case_id: any -> None { run_demo(case_id); }}
+                    onDemo={lambda case_id: int -> None { run_demo(case_id); }}
                     onReset={lambda -> None { bootstrap(); }}
                 />
             </div>
