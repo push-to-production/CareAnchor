@@ -5,8 +5,10 @@ import from os { getenv }
 import from models.session { ConversationStateUpdate }
 import from .common { first_non_empty, merge_strings, normalize_text, transcript_excerpt }
 import from .symptom_mapper { extract_symptom_keywords, codes_from_keywords }
+import from byllm.lib { Model }
 
 glob LLM_READY: bool = True;
+glob llm: Model = Model(model_name="ollama/llama3.2");
 
 glob INSURANCE_ALIASES: dict[str, list[str]] = {
     "Aetna": ["aetna"],

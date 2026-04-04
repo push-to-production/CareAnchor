@@ -56,7 +56,14 @@ def run_pipeline(session: UserSession, message: str) -> dict {
     run_conversation_agent(session, message);
     calling = run_calling_agent(session);
 
-    if not minimum_fields_ready(session) or not calling.provider_search_ready {
+    user_turns = 0;
+    for m in session.transcript {
+        role = m["role"] if isinstance(m, dict) else m.role;
+        if role == "user" { user_turns += 1; }
+    }
+    force_diagnosis = user_turns >= 2 and len(session.extracted_symptoms) > 0;
+
+    if not force_diagnosis and (not minimum_fields_ready(session) or not calling.provider_search_ready) {
         reply = build_calling_follow_up(session, calling);
         append_message(session, "assistant", reply, "Calling Agent", iso_now());
         return build_payload(session, reply, False);

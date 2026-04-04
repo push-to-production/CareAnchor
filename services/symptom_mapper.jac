@@ -4,8 +4,10 @@ import from os { getenv }
 import from models.codes { DiagnosisCode }
 import from models.session { DiagnosisResult }
 import from data.icd_codes { get_icd_code_library }
+import from byllm.lib { Model }
 
 glob LLM_READY: bool = True;
+glob llm: Model = Model(model_name="ollama/llama3.2");
 
 glob SYMPTOM_KEYWORD_MAP: dict[str, list[str]] = {
     "R42":   ["dizzy", "dizziness", "lightheaded", "vertigo", "spinning"],

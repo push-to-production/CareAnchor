@@ -147,7 +147,6 @@ def:pub AppShell() -> JsxElement {
     active_agent = session["active_agent"] if "active_agent" in session else "Conversation Agent";
     intervention_active = session["intervention_active"] if "intervention_active" in session else False;
     risk_flags = session["risk_flags"] if "risk_flags" in session else [];
-    agent_trace = session["agent_trace"] if "agent_trace" in session else [];
     disclaimer = session["disclaimer"] if "disclaimer" in session else "Care Anchor — AI triage and care coordination.";
 
     return <div className="app-shell">
@@ -177,7 +176,6 @@ def:pub AppShell() -> JsxElement {
             </div>
             <aside className="workspace__side">
                 <SummaryPanel session={session} />
-                <AgentTrace trace={agent_trace} />
                 <ExportButtons
                     sessionId={sessionId}
                     onJson={lambda -> None { do_export_json(); }}

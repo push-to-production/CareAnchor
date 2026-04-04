@@ -4,8 +4,10 @@ import from os { getenv }
 import from models.session { UserSession, DiagnosisResult, CareSummary }
 import from models.codes { DiagnosisCode }
 import from models.provider { ProviderOption }
+import from byllm.lib { Model }
 
 glob LLM_READY: bool = True;
+glob llm: Model = Model(model_name="ollama/llama3.2");
 
 """Format a concise, empathetic care coordination reply in Markdown.
 Include: a brief summary of what was heard, a section listing the 2-3 most relevant
