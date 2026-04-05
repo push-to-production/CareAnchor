@@ -55,21 +55,6 @@ textarea {
   padding: 24px;
 }
 
-.screen-corner-logo {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  width: clamp(128px, 16vw, 220px);
-  aspect-ratio: 1 / 1;
-  background-image: url("../assets/anchorcare_logo_blck.png");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  pointer-events: none;
-  user-select: none;
-  z-index: 12;
-}
-
 .dashboard-frame {
   max-width: 1440px;
   margin: 0 auto;
@@ -267,7 +252,30 @@ textarea {
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
-  padding: 8px 2px;
+  padding: 8px 0;
+}
+
+.dashboard-header__brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-left: -4px;
+}
+
+.dashboard-header__logo {
+  width: clamp(56px, 4vw, 72px);
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(240, 248, 253, 0.78));
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: var(--shadow-sm);
+  background-image: url("../assets/anchorcare_logo_blck.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 72%;
 }
 
 .dashboard-header__copy {
@@ -287,6 +295,7 @@ textarea {
   color: var(--muted);
   font-size: 0.98rem;
   line-height: 1.6;
+  max-width: 700px;
 }
 
 .brand-mark {
@@ -1022,12 +1031,6 @@ textarea {
     padding: 16px;
   }
 
-  .screen-corner-logo {
-    right: 12px;
-    bottom: 12px;
-    width: clamp(96px, 28vw, 140px);
-  }
-
   .login-hero,
   .login-card {
     padding: 20px;
@@ -1035,6 +1038,10 @@ textarea {
 
   .dashboard-header {
     flex-direction: column;
+  }
+
+  .dashboard-header__brand {
+    margin-left: 0;
   }
 
   .dashboard-header__controls {
