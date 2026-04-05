@@ -11,7 +11,9 @@ sv import from __main__ {
     export_pdf,
     load_demo,
     get_user_by_token,
-    logout
+    logout,
+    list_sessions,
+    load_session
 }
 
 def set_auth_cookie(token: str) -> None {
@@ -34,10 +36,10 @@ def clear_auth_cookie() -> None {
     document.cookie = "care_anchor_token=; path=/; max-age=0";
 }
 
-import from .AgentTrace { AgentTrace }
 import from .ChatWindow { ChatWindow }
 import from .CrisisBanner { CrisisBanner }
 import from .LoginScreen { LoginScreen, format_phone }
+import from .SessionList { SessionList }
 import from .SessionPdf { build_session_pdf_attachment }
 import from .SummaryPanel { SummaryPanel }
 
@@ -100,6 +102,20 @@ def:pub AppShell() -> JsxElement {
     has errorText: str = "";
     has activeTab: str = "chat";
     has localTranscript: list = [];
+    has pastSessions: list = [];
+    has showSessions: bool = False;
+
+    async def fetchSessions(phone: str) -> None {
+        try {
+            result = root spawn list_sessions(phone_number=phone);
+            if result.reports.length > 0 {
+                payload = result.reports[0];
+                pastSessions = payload["sessions"] if "sessions" in payload else [];
+            }
+        } except Exception as e {
+            0;
+        }
+    }
 
     async def bootstrap(phone: str) -> None {
         booting = True;
@@ -115,11 +131,37 @@ def:pub AppShell() -> JsxElement {
                 payload = result.reports[0];
                 sessionId = payload["session_id"];
                 session = payload["session"];
+                fetchSessions(phone);
             } else {
                 errorText = "Unable to start an AnchorCare session. Is the backend running?";
             }
         } except Exception as e {
             errorText = "Connection error. Please check that the backend is running.";
+        }
+        booting = False;
+    }
+
+    async def selectSession(sid: str) -> None {
+        if sid == sessionId { showSessions = false; return; }
+        booting = True;
+        errorText = "";
+        exportStatus = "";
+        localTranscript = [];
+        draft = "";
+        try {
+            result = root spawn load_session(session_id=sid);
+            if result.reports.length > 0 {
+                payload = result.reports[0];
+                if "error" in payload {
+                    errorText = payload["error"];
+                } else {
+                    sessionId = payload["session_id"];
+                    session = payload["session"];
+                    showSessions = false;
+                }
+            }
+        } except Exception as e {
+            errorText = "Could not load session.";
         }
         booting = False;
     }
@@ -132,7 +174,8 @@ def:pub AppShell() -> JsxElement {
         authToken = token;
         if token != "" { set_auth_cookie(token); }
         loggedIn = true;
-        bootstrap(user["phone_number"]);
+        fetchSessions(user["phone_number"]);
+        showSessions = true;
     }
 
     async def handleLogout() -> None {
@@ -150,6 +193,8 @@ def:pub AppShell() -> JsxElement {
         errorText = "";
         exportStatus = "";
         localTranscript = [];
+        pastSessions = [];
+        showSessions = false;
     }
 
     async def restoreSession() -> None {
@@ -178,16 +223,24 @@ def:pub AppShell() -> JsxElement {
         errorText = "";
         outbound = draft;
         draft = "";
+        now_ts = String(Date.now());
+        pending_msg = {"role": "user", "content": outbound, "timestamp": now_ts, "agent": "User"};
+        localTranscript = localTranscript.concat([pending_msg]);
         try {
             result = root spawn process_message(session_id=sessionId, message=outbound);
             if result.reports.length > 0 {
                 payload = result.reports[0];
-                if "session" in payload { session = payload["session"]; }
+                if "session" in payload {
+                    session = payload["session"];
+                    localTranscript = [];
+                }
             } else {
                 errorText = "The message could not be processed. Please try again.";
+                localTranscript = [];
             }
         } except Exception as e {
             errorText = "Network error sending message.";
+            localTranscript = [];
         }
         sending = False;
     }
@@ -262,6 +315,29 @@ def:pub AppShell() -> JsxElement {
         return <LoginScreen onLogin={handleLogin} />;
     }
 
+    if showSessions {
+        return <div className="session-chooser">
+            <header className="session-chooser__header">
+                <div className="session-chooser__header-left">
+                    <button className="btn btn--sm btn--ghost" onClick={lambda -> None { showSessions = false; }}>← Back</button>
+                    <div className="brand-mark">ANCHORCARE</div>
+                </div>
+                <div className="header-user">
+                    <span className="header-phone">{format_phone(phoneNumber)}</span>
+                    <button className="btn btn--sm header-signout" onClick={lambda -> None { handleLogout(); }}>Sign out</button>
+                </div>
+            </header>
+            <div className="session-chooser__body">
+                <SessionList
+                    sessions={pastSessions}
+                    currentSessionId={sessionId}
+                    onSelect={lambda sid: str -> None { selectSession(sid); }}
+                    onNew={lambda -> None { showSessions = false; bootstrap(phoneNumber); }}
+                />
+            </div>
+        </div>;
+    }
+
     active_agent = session["active_agent"] if "active_agent" in session else "Conversation Agent";
     intervention_active = session["intervention_active"] if "intervention_active" in session else False;
     risk_flags = session["risk_flags"] if "risk_flags" in session else [];
@@ -303,6 +379,7 @@ def:pub AppShell() -> JsxElement {
                         </button>
                     </div>
                     <div className="header-user">
+                        <button className="btn btn--sm header-sessions" onClick={lambda -> None { fetchSessions(phoneNumber); showSessions = true; }}>Sessions</button>
                         <span className="header-phone">{format_phone(phoneNumber)}</span>
                         <button className="btn btn--sm header-signout" onClick={lambda -> None { handleLogout(); }}>Sign out</button>
                     </div>

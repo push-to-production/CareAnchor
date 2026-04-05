@@ -71,6 +71,33 @@ def _mock_fallback(
     return matched[:max_results];
 }
 
+def find_therapists(location: str, max_results: int) -> list[ProviderOption] {
+    therapy_diagnosis = DiagnosisResult(
+        narrative_reasoning="Crisis intervention — mental health support needed",
+        confidence_note="",
+        symptom_codes=[],
+        inferred_specialties=["Psychiatry", "Mental Health", "Psychology", "Counseling", "Therapist"],
+        provider_query_terms=["therapist", "mental health", "psychiatry", "counseling"]
+    );
+    return find_providers(therapy_diagnosis, location, max_results);
+}
+
+def format_therapists_markdown(providers: list[ProviderOption], location: str) -> str {
+    if not providers or len(providers) == 0 {
+        return "I wasn't able to find therapists in your area right now, but you can call **988** (Suicide & Crisis Lifeline) or text HOME to **741741** (Crisis Text Line) for immediate support.";
+    }
+    loc_label = "near " + location if location and location.strip() != "" else "(telehealth)";
+    lines: list[str] = ["Here are some mental health providers " + loc_label + " who can help:\n"];
+    for p in providers {
+        telehealth_note = " · Telehealth available" if p.telehealth_available else "";
+        lines.append("**" + p.name + "** — " + p.specialty);
+        lines.append(p.address + " · " + p.phone + telehealth_note);
+        lines.append("");
+    }
+    lines.append("You can also call or text **988** at any time for the Suicide & Crisis Lifeline.");
+    return "\n".join(lines);
+}
+
 def find_providers(
     diagnosis: DiagnosisResult,
     location: str,

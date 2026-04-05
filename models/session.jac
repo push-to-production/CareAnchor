@@ -72,6 +72,7 @@ node UserSession {
     has agent_path: list[str] = [];
     has intervention_active: bool = False;
     has intervention_resolved: bool = False;
+    has crisis_therapists_shown: bool = False;
     has symptom_duration: str | None = None;
     has severity: str | None = None;
     has location: str | None = None;
