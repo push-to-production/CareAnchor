@@ -37,6 +37,7 @@ def clear_auth_cookie() -> None {
 import from .ChatWindow { ChatWindow }
 import from .CrisisBanner { CrisisBanner }
 import from .LoginScreen { LoginScreen, format_phone }
+import from .SessionPdf { build_session_pdf_attachment }
 import from .SummaryPanel { SummaryPanel }
 
 def tab_class(active_tab: str, tab_name: str) -> str {
@@ -68,27 +69,20 @@ def empty_session() -> dict {
         "location": None,
         "insurance": None,
         "summary_text": None,
-        "disclaimer": "AnchorCare supports care coordination. It does not replace emergency care or professional diagnosis."
+        "doctor_notes": None,
+        "disclaimer": "AnchorCare is an AI-powered care coordination platform. It does not replace emergency care or professional diagnosis."
     };
 }
 
-def build_pdf_chat_message(payload: dict) -> dict {
-    file_name = payload["file_name"] if "file_name" in payload else "care_anchor_summary.pdf";
-    mime_type = payload["mime_type"] if "mime_type" in payload else "application/pdf";
-    href = "data:" + mime_type + ";base64," + payload["content_base64"];
+def build_pdf_chat_message(payload: dict, attachment: dict) -> dict {
     timestamp = payload["generated_at"] if "generated_at" in payload else "";
 
     return {
         "role": "assistant",
-        "content": "Your Care Anchor session summary is ready as a PDF attachment.",
+        "content": "Your AnchorCare session summary is ready as a PDF attachment.",
         "timestamp": timestamp,
         "agent": "Summary Agent",
-        "attachment": {
-            "label": file_name,
-            "href": href,
-            "download_name": file_name,
-            "mime_type": mime_type
-        }
+        "attachment": attachment
     };
 }
 
@@ -210,10 +204,15 @@ def:pub AppShell() -> JsxElement {
                 }
                 if "error" in payload {
                     exportStatus = payload["error"];
-                } elif "content_base64" in payload {
-                    localTranscript = localTranscript.concat([build_pdf_chat_message(payload)]);
-                    exportStatus = "PDF ready in chat.";
-                    activeTab = "chat";
+                } elif "html_content" in payload {
+                    attachment = await build_session_pdf_attachment(payload);
+                    if attachment != None {
+                        localTranscript = localTranscript.concat([build_pdf_chat_message(payload, attachment)]);
+                        exportStatus = "PDF ready in chat.";
+                        activeTab = "chat";
+                    } else {
+                        exportStatus = "PDF export failed.";
+                    }
                 } else {
                     exportStatus = "PDF export failed.";
                 }
@@ -232,7 +231,7 @@ def:pub AppShell() -> JsxElement {
     active_agent = session["active_agent"] if "active_agent" in session else "Conversation Agent";
     intervention_active = session["intervention_active"] if "intervention_active" in session else False;
     risk_flags = session["risk_flags"] if "risk_flags" in session else [];
-    disclaimer = session["disclaimer"] if "disclaimer" in session else "AnchorCare for triage and care coordination.";
+    disclaimer = session["disclaimer"] if "disclaimer" in session else "AnchorCare is an AI-powered care coordination platform. It does not replace emergency care or professional diagnosis.";
     transcript = session["transcript"] if "transcript" in session else [];
     providers = session["provider_options"] if "provider_options" in session else [];
     summary_text = session["summary_text"] if "summary_text" in session else "";
@@ -242,10 +241,13 @@ def:pub AppShell() -> JsxElement {
     return <div className="dashboard-shell">
         <div className="dashboard-frame">
             <header className="dashboard-header">
-                <div className="dashboard-header__copy">
-                    <div className="brand-mark">ANCHORCARE</div>
-                    <h1>AnchorCare Dashboard</h1>
-                    <p>{disclaimer}</p>
+                <div className="dashboard-header__brand">
+                    <div className="dashboard-header__logo" aria-hidden="true"></div>
+                    <div className="dashboard-header__copy">
+                        <div className="brand-mark">ANCHORCARE</div>
+                        <h1>AnchorCare Dashboard</h1>
+                        <p>{disclaimer}</p>
+                    </div>
                 </div>
 
                 <div className="dashboard-header__controls">
@@ -362,6 +364,5 @@ def:pub AppShell() -> JsxElement {
                 </aside>
             </main>
         </div>
-        <div className="screen-corner-logo" aria-hidden="true"></div>
     </div>;
 }

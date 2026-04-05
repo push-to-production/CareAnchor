@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "marked": "^9.1.6"
+    "@react-pdf/renderer": "^4.3.3",
+    "marked": "^9.1.6",
+    "react-pdf-html": "^2.1.5"
   }
 }
