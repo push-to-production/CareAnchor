@@ -140,6 +140,13 @@ textarea {
   gap: 12px;
 }
 
+.login-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 6px;
+}
+
 .login-highlight {
   display: flex;
   flex-direction: column;
@@ -245,6 +252,11 @@ textarea {
   color: var(--muted);
   font-size: 0.84rem;
   line-height: 1.6;
+}
+
+.login-hero__back {
+  border-radius: 999px;
+  align-self: flex-start;
 }
 
 .dashboard-header {
@@ -881,6 +893,18 @@ textarea {
   color: var(--text);
 }
 
+.btn--light {
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--text);
+  box-shadow: 0 12px 24px rgba(17, 56, 92, 0.18);
+}
+
+.btn--ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+}
+
 .btn--crisis {
   background: linear-gradient(135deg, var(--danger), #df6870);
   color: #ffffff;
@@ -979,6 +1003,22 @@ textarea {
 .call-stage__note p {
   max-width: none;
   font-size: 0.9rem;
+}
+
+.route-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.route-loading__card {
+  min-width: min(420px, 100%);
+  text-align: center;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--blue-deep);
 }
 
 /* ── Marketing landing page ─────────────────────────────── */
@@ -1104,6 +1144,12 @@ textarea {
   gap: 18px;
 }
 
+.marketing-nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .marketing-nav__link {
   color: var(--muted);
   font-size: 0.92rem;
@@ -1120,6 +1166,10 @@ textarea {
   border-radius: 999px;
   padding-left: 1.2rem;
   padding-right: 1.2rem;
+}
+
+.marketing-nav__signin {
+  border-radius: 999px;
 }
 
 .marketing-hero {
@@ -1455,6 +1505,14 @@ textarea {
   letter-spacing: 0.08em;
 }
 
+.marketing-step__code--risk {
+  background: rgba(255, 238, 239, 0.92);
+  color: #b54856;
+  border: 1px solid rgba(214, 112, 126, 0.18);
+  box-shadow: 0 0 0 0 rgba(214, 112, 126, 0.26);
+  animation: risk-pulse 1800ms ease-out infinite;
+}
+
 .marketing-step h3,
 .marketing-feature h3,
 .marketing-value strong,
@@ -1595,6 +1653,81 @@ textarea {
   line-height: 1.6;
 }
 
+.marketing-cta {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(28px, 4vw, 44px);
+  border-radius: 32px;
+  background: linear-gradient(135deg, rgba(24, 79, 150, 0.98), rgba(18, 107, 97, 0.96));
+  box-shadow: var(--shadow-lg);
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.marketing-cta::before,
+.marketing-cta::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.marketing-cta::before {
+  width: 220px;
+  height: 220px;
+  top: -90px;
+  right: -70px;
+}
+
+.marketing-cta::after {
+  width: 160px;
+  height: 160px;
+  bottom: -70px;
+  left: -40px;
+}
+
+.marketing-cta__copy,
+.marketing-cta__actions {
+  position: relative;
+  z-index: 1;
+}
+
+.marketing-cta__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 42rem;
+}
+
+.marketing-cta__copy h2 {
+  font-size: clamp(2rem, 3.2vw, 3.2rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.marketing-cta__copy p {
+  color: rgba(232, 245, 255, 0.84);
+  line-height: 1.72;
+  font-size: 1rem;
+}
+
+.marketing-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.marketing-cta__primary,
+.marketing-cta__secondary {
+  min-width: 168px;
+  border-radius: 999px;
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.45; transform: scale(0.92); }
@@ -1608,6 +1741,19 @@ textarea {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes risk-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0 rgba(214, 112, 126, 0.22),
+      0 0 0 0 rgba(214, 112, 126, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 0 8px rgba(214, 112, 126, 0.08),
+      0 0 0 14px rgba(214, 112, 126, 0.04);
   }
 }
 
@@ -1755,6 +1901,9 @@ textarea {
 
   .marketing-nav__inner,
   .marketing-nav__links,
+  .marketing-nav__actions,
+  .marketing-cta,
+  .marketing-cta__actions,
   .marketing-footer__inner {
     flex-direction: column;
     align-items: stretch;
@@ -1765,6 +1914,9 @@ textarea {
   }
 
   .marketing-nav__cta,
+  .marketing-nav__signin,
+  .marketing-cta__primary,
+  .marketing-cta__secondary,
   .marketing-hero__primary,
   .marketing-hero__secondary {
     width: 100%;
