@@ -61,6 +61,7 @@ node UserSession {
     has session_id: str;
     has created_at: str;
     has updated_at: str;
+    has phone_number: str = "";
     has active_agent: str = "Conversation Agent";
     has last_user_message: str = "";
     has transcript: list = [];
@@ -148,6 +149,7 @@ def session_to_dict(session: UserSession) -> dict {
     providers_list: list = [_to_dict_provider(p) for p in session.provider_options];
     return {
         "session_id": session.session_id,
+        "phone_number": session.phone_number,
         "created_at": session.created_at,
         "updated_at": session.updated_at,
         "active_agent": session.active_agent,

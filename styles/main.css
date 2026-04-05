@@ -225,6 +225,89 @@ body {
 .export-buttons { display: flex; flex-direction: column; gap: 8px; }
 .export-status { font-size: .78rem; color: var(--muted); margin-top: 4px; }
 
+/* ── Login Screen ────────────────────────────────────────── */
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  padding: 24px;
+}
+.login-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.08);
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.login-brand {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--brand);
+  letter-spacing: -.03em;
+}
+.login-tagline {
+  font-size: .85rem;
+  color: var(--muted);
+  margin-top: -8px;
+}
+.login-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 8px;
+}
+.login-error { margin: 0; }
+.login-field { display: flex; flex-direction: column; gap: 6px; }
+.login-label { font-size: .85rem; font-weight: 500; color: var(--text); }
+.login-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--text);
+  transition: border-color .15s;
+}
+.login-input:focus { outline: none; border-color: var(--brand); }
+.login-input:disabled { background: #f9fafb; opacity: .7; }
+.login-btn { width: 100%; padding: 12px; font-size: 1rem; }
+.login-note {
+  font-size: .78rem;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ── Hero user / sign-out ────────────────────────────────── */
+.hero-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-user {
+  font-size: .8rem;
+  opacity: .85;
+  background: rgba(255,255,255,.15);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.hero-signout {
+  font-size: .78rem;
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.35);
+}
+.hero-signout:hover { background: rgba(255,255,255,.25); opacity: 1; }
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 768px) {
   .workspace { flex-direction: column; height: auto; }
