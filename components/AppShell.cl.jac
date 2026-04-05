@@ -7,6 +7,7 @@ cl import from react { useEffect }
 sv import from __main__ {
     create_session,
     process_message,
+<<<<<<< HEAD
     export_json,
     export_pdf,
     load_demo,
@@ -32,11 +33,13 @@ def get_auth_cookie() -> str {
 
 def clear_auth_cookie() -> None {
     document.cookie = "care_anchor_token=; path=/; max-age=0";
+=======
+    export_pdf
+>>>>>>> e8bfc5e52fa28bdcd9f0a06b751e2d6d4081f8c5
 }
 
 import from .ChatWindow { ChatWindow }
 import from .CrisisBanner { CrisisBanner }
-import from .ExportButtons { ExportButtons }
 import from .LoginScreen { LoginScreen, format_phone }
 import from .SummaryPanel { SummaryPanel }
 
@@ -69,7 +72,7 @@ def empty_session() -> dict {
         "location": None,
         "insurance": None,
         "summary_text": None,
-        "disclaimer": "Care Anchor supports care coordination. It does not replace emergency care or professional diagnosis."
+        "disclaimer": "AnchorCare supports care coordination. It does not replace emergency care or professional diagnosis."
     };
 }
 
@@ -101,7 +104,7 @@ def:pub AppShell() -> JsxElement {
                 sessionId = payload["session_id"];
                 session = payload["session"];
             } else {
-                errorText = "Unable to start a Care Anchor session. Is the backend running?";
+                errorText = "Unable to start an AnchorCare session. Is the backend running?";
             }
         } except Exception as e {
             errorText = "Connection error. Please check that the backend is running.";
@@ -176,41 +179,6 @@ def:pub AppShell() -> JsxElement {
         sending = False;
     }
 
-    async def run_demo(case_id: int) -> None {
-        sending = True;
-        booting = False;
-        errorText = "";
-        exportStatus = "";
-        try {
-            result = root spawn load_demo(case_id=case_id);
-            if result.reports.length > 0 {
-                payload = result.reports[0];
-                sessionId = payload["session_id"];
-                session = payload["session"];
-                draft = "";
-            } else {
-                errorText = "Demo case could not be loaded.";
-            }
-        } except Exception as e {
-            errorText = "Error loading demo case.";
-        }
-        sending = False;
-    }
-
-    async def do_export_json() -> None {
-        if sessionId == "" { return; }
-        exportStatus = "Exporting...";
-        try {
-            result = root spawn export_json(session_id=sessionId);
-            if result.reports.length > 0 {
-                payload = result.reports[0];
-                exportStatus = "JSON saved: " + payload["file_path"];
-            }
-        } except Exception as e {
-            exportStatus = "JSON export failed.";
-        }
-    }
-
     async def do_export_pdf() -> None {
         if sessionId == "" { return; }
         exportStatus = "Exporting...";
@@ -232,9 +200,8 @@ def:pub AppShell() -> JsxElement {
     active_agent = session["active_agent"] if "active_agent" in session else "Conversation Agent";
     intervention_active = session["intervention_active"] if "intervention_active" in session else False;
     risk_flags = session["risk_flags"] if "risk_flags" in session else [];
-    disclaimer = session["disclaimer"] if "disclaimer" in session else "Care Anchor for triage and care coordination.";
+    disclaimer = session["disclaimer"] if "disclaimer" in session else "AnchorCare for triage and care coordination.";
     transcript = session["transcript"] if "transcript" in session else [];
-    trace = session["agent_trace"] if "agent_trace" in session else [];
     providers = session["provider_options"] if "provider_options" in session else [];
     summary_text = session["summary_text"] if "summary_text" in session else "";
     session_state = "Preparing session..." if booting else "Session ready";
@@ -243,8 +210,8 @@ def:pub AppShell() -> JsxElement {
         <div className="dashboard-frame">
             <header className="dashboard-header">
                 <div className="dashboard-header__copy">
-                    <div className="brand-mark">Care Anchor</div>
-                    <h1>HealthAI Dashboard</h1>
+                    <div className="brand-mark">ANCHORCARE</div>
+                    <h1>AnchorCare Dashboard</h1>
                     <p>{disclaimer}</p>
                 </div>
 
@@ -289,8 +256,10 @@ def:pub AppShell() -> JsxElement {
                             activeAgent={active_agent}
                             onDraftChange={lambda value: str -> None { draft = value; }}
                             onSend={lambda -> None { send_message(); }}
-                            onDemo={lambda case_id: int -> None { run_demo(case_id); }}
-                            onReset={lambda -> None { bootstrap(); }}
+                            onPdf={lambda -> None { do_export_pdf(); }}
+                            onReset={lambda -> None { bootstrap(phoneNumber); }}
+                            exportStatus={exportStatus}
+                            exportDisabled={sessionId == ""}
                         />
                     }
 
@@ -357,12 +326,6 @@ def:pub AppShell() -> JsxElement {
                     </div>
 
                     <SummaryPanel session={session} />
-                    <ExportButtons
-                        sessionId={sessionId}
-                        onJson={lambda -> None { do_export_json(); }}
-                        onPdf={lambda -> None { do_export_pdf(); }}
-                        exportStatus={exportStatus}
-                    />
                 </aside>
             </main>
         </div>
