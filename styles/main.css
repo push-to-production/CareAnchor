@@ -1129,3 +1129,75 @@ textarea {
   cursor: pointer;
 }
 .header-signout:hover { background: rgba(255,255,255,.22); opacity: 1; }
+
+/* ── Session chooser screen ─────────────────────────────── */
+.session-chooser {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f3f4f6;
+}
+.session-chooser__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: var(--brand, #1a7f5a);
+  color: #fff;
+}
+.session-chooser__body {
+  flex: 1;
+  max-width: 680px;
+  width: 100%;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+/* ── Session list ────────────────────────────────────────── */
+.session-list { display: flex; flex-direction: column; gap: 12px; }
+.session-list--empty { align-items: center; padding: 48px 0; gap: 16px; color: var(--muted, #6b7280); }
+.session-list__empty-text { font-size: .95rem; }
+.session-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.session-list__title { font-size: 1rem; font-weight: 600; }
+.session-list__items { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+.session-item {
+  background: #fff;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 8px;
+  padding: 14px 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.session-item:hover { border-color: var(--brand, #1a7f5a); box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+.session-item--active { border-color: var(--brand, #1a7f5a); background: #f0faf6; }
+.session-item--crisis { border-color: var(--crisis, #c0392b); background: #fef8f8; }
+.session-item__preview { font-size: .9rem; color: var(--text, #1c1c1e); font-weight: 500; line-height: 1.4; }
+.session-item__meta { display: flex; gap: 12px; font-size: .75rem; color: var(--muted, #6b7280); }
+.session-item__tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.session-item__tag {
+  background: var(--brand-light, #e8f5f0);
+  color: var(--brand, #1a7f5a);
+  border: 1px solid var(--brand, #1a7f5a);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-size: .72rem;
+}
+
+/* ── Sessions header button ──────────────────────────────── */
+.header-sessions {
+  background: rgba(255,255,255,.12);
+  color: inherit;
+  border: 1px solid rgba(255,255,255,.3);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.header-sessions:hover { background: rgba(255,255,255,.22); opacity: 1; }

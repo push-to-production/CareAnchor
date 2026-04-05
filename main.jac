@@ -12,7 +12,9 @@ sv import from agents.orchestrator {
     get_session,
     export_json,
     export_pdf,
-    load_demo
+    load_demo,
+    list_sessions,
+    load_session
 }
 
 cl import from .components.AppShell { AppShell }

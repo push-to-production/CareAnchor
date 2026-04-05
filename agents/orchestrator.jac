@@ -153,6 +153,53 @@ walker :pub export_pdf {
     }
 }
 
+walker :pub list_sessions {
+    has phone_number: str;
+
+    can start with Root entry {
+        anchor = root();
+        all_sessions = [s for s in [anchor -->](?:UserSession) if s.phone_number == self.phone_number];
+        summaries: list = [];
+        for s in all_sessions {
+            msg_count = len(s.transcript);
+            first_user_msg = "";
+            for m in s.transcript {
+                role = m["role"] if isinstance(m, dict) else m.role;
+                content = m["content"] if isinstance(m, dict) else m.content;
+                if role == "user" {
+                    first_user_msg = content[:80];
+                    break;
+                }
+            }
+            summaries.append({
+                "session_id": s.session_id,
+                "created_at": s.created_at,
+                "updated_at": s.updated_at,
+                "message_count": msg_count,
+                "preview": first_user_msg,
+                "location": s.location,
+                "symptoms": s.extracted_symptoms[:3],
+                "intervention_active": s.intervention_active
+            });
+        }
+        summaries.sort(key=lambda x: x["updated_at"], reverse=True);
+        report {"sessions": summaries};
+    }
+}
+
+walker :pub load_session {
+    has session_id: str;
+
+    can start with Root entry {
+        session = find_session(self.session_id);
+        if session == None {
+            report {"error": "Session not found"};
+            disengage;
+        }
+        report build_payload(session, "", False);
+    }
+}
+
 walker :pub load_demo {
     has case_id: int = 1;
 
