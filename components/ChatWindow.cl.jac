@@ -10,7 +10,6 @@ def:pub ChatWindow(
     activeAgent: str,
     onDraftChange: any,
     onSend: any,
-    onDemo: any,
     onPdf: any,
     onReset: any,
     exportStatus: str,
@@ -81,34 +80,6 @@ def:pub ChatWindow(
                 disabled={sending or draft.trim() == ""}
             >
                 Send
-            </button>
-        </div>
-
-        <div className="demo-bar">
-            <span className="demo-bar__label">Try a demo:</span>
-            <button
-                type="button"
-                className="btn btn--secondary btn--sm"
-                onClick={lambda e: any -> None { onDemo(1); }}
-                disabled={sending}
-            >
-                Dizziness + BP
-            </button>
-            <button
-                type="button"
-                className="btn btn--secondary btn--sm"
-                onClick={lambda e: any -> None { onDemo(2); }}
-                disabled={sending}
-            >
-                Nausea + Stomach Pain
-            </button>
-            <button
-                type="button"
-                className="btn btn--crisis btn--sm"
-                onClick={lambda e: any -> None { onDemo(3); }}
-                disabled={sending}
-            >
-                Crisis Language
             </button>
         </div>
 

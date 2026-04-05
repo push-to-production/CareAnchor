@@ -1086,26 +1086,7 @@ textarea {
     width: 100%;
   }
 
-.demo-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding: 12px 24px;
-  border-top: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(240, 248, 255, 0.9), rgba(233, 245, 255, 0.94));
-}
-
-.demo-bar__label {
-  color: var(--muted-soft);
-  font-size: 0.76rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  white-space: nowrap;
-}
-
-.chat-actions {
+  .chat-actions {
     flex-direction: column;
     align-items: stretch;
   }
