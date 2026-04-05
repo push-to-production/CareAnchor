@@ -178,16 +178,24 @@ def:pub AppShell() -> JsxElement {
         errorText = "";
         outbound = draft;
         draft = "";
+        now_ts = String(Date.now());
+        pending_msg = {"role": "user", "content": outbound, "timestamp": now_ts, "agent": "User"};
+        localTranscript = localTranscript.concat([pending_msg]);
         try {
             result = root spawn process_message(session_id=sessionId, message=outbound);
             if result.reports.length > 0 {
                 payload = result.reports[0];
-                if "session" in payload { session = payload["session"]; }
+                if "session" in payload {
+                    session = payload["session"];
+                    localTranscript = [];
+                }
             } else {
                 errorText = "The message could not be processed. Please try again.";
+                localTranscript = [];
             }
         } except Exception as e {
             errorText = "Network error sending message.";
+            localTranscript = [];
         }
         sending = False;
     }
