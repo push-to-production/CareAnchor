@@ -62,8 +62,9 @@ def run_pipeline(session: UserSession, message: str) -> dict {
         if role == "user" { user_turns += 1; }
     }
     force_diagnosis = user_turns >= 2 and len(session.extracted_symptoms) > 0;
+    ready_now = (len(session.extracted_symptoms) > 0) and calling.provider_search_ready;
 
-    if user_turns < 2 or (not force_diagnosis and (not minimum_fields_ready(session) or not calling.provider_search_ready)) {
+    if not ready_now and not force_diagnosis {
         reply = build_calling_follow_up(session, calling);
         append_message(session, "assistant", reply, "Calling Agent", iso_now());
         return build_payload(session, reply, False);

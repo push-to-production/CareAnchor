@@ -34,6 +34,7 @@ def clear_auth_cookie() -> None {
     document.cookie = "care_anchor_token=; path=/; max-age=0";
 }
 
+import from .AgentTrace { AgentTrace }
 import from .ChatWindow { ChatWindow }
 import from .CrisisBanner { CrisisBanner }
 import from .LoginScreen { LoginScreen, format_phone }
@@ -189,6 +190,40 @@ def:pub AppShell() -> JsxElement {
         }
     }
 
+    async def do_export_json() -> None {
+        if sessionId == "" { return; }
+        exportStatus = "Exporting...";
+        try {
+            result = root spawn export_json(session_id=sessionId);
+            if result.reports.length > 0 {
+                payload = result.reports[0];
+                exportStatus = "JSON saved: " + payload["file_path"];
+            }
+        } except Exception as e {
+            exportStatus = "JSON export failed.";
+        }
+    }
+
+    async def run_demo(case_id: int) -> None {
+        sending = True;
+        errorText = "";
+        exportStatus = "";
+        try {
+            result = root spawn load_demo(case_id=case_id);
+            if result.reports.length > 0 {
+                payload = result.reports[0];
+                sessionId = payload["session_id"];
+                session = payload["session"];
+                draft = "";
+            } else {
+                errorText = "Demo case could not be loaded.";
+            }
+        } except Exception as e {
+            errorText = "Error loading demo case.";
+        }
+        sending = False;
+    }
+
     if not loggedIn {
         return <LoginScreen onLogin={handleLogin} />;
     }
@@ -196,6 +231,7 @@ def:pub AppShell() -> JsxElement {
     active_agent = session["active_agent"] if "active_agent" in session else "Conversation Agent";
     intervention_active = session["intervention_active"] if "intervention_active" in session else False;
     risk_flags = session["risk_flags"] if "risk_flags" in session else [];
+    agent_trace = session["agent_trace"] if "agent_trace" in session else [];
     disclaimer = session["disclaimer"] if "disclaimer" in session else "AnchorCare for triage and care coordination.";
     transcript = session["transcript"] if "transcript" in session else [];
     providers = session["provider_options"] if "provider_options" in session else [];
@@ -252,6 +288,7 @@ def:pub AppShell() -> JsxElement {
                             activeAgent={active_agent}
                             onDraftChange={lambda value: str -> None { draft = value; }}
                             onSend={lambda -> None { send_message(); }}
+                            onDemo={lambda case_id: any -> None { run_demo(case_id); }}
                             onPdf={lambda -> None { do_export_pdf(); }}
                             onReset={lambda -> None { bootstrap(phoneNumber); }}
                             exportStatus={exportStatus}
@@ -322,6 +359,7 @@ def:pub AppShell() -> JsxElement {
                     </div>
 
                     <SummaryPanel session={session} />
+                    <AgentTrace trace={agent_trace} />
                 </aside>
             </main>
         </div>

@@ -48,7 +48,17 @@
       "Bash(pip show:*)",
       "Bash(pip install:*)",
       "Bash(python3 -m pip install sentence-transformers numpy --quiet)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(make help:*)",
+      "Bash(make clean-index:*)",
+      "Bash(make icd-index:*)",
+      "mcp__jac__check_syntax",
+      "Bash(ls /tmp/jac_server*.log)",
+      "Bash(ls -lt /tmp/jac_server*.log)",
+      "Bash(curl -s \"https://clinicaltables.nlm.nih.gov/api/npi_idv/v3/search?terms=Psychiatry&sf=provider_type,addr_practice.city,addr_practice.state&q=addr_practice.state:IL&df=NPI,name.full,provider_type,addr_practice.full&ef=name.credential,addr_practice.phone,addr_practice.city,addr_practice.zip,gender&maxList=5\")",
+      "Bash(curl -s \"https://clinicaltables.nlm.nih.gov/api/npi_idv/v3/search?terms=Internal+Medicine&sf=provider_type,addr_practice.city,addr_practice.state&q=addr_practice.state:WA+AND+addr_practice.city:SEATTLE&df=NPI,name.full,provider_type,addr_practice.full&ef=name.credential,addr_practice.phone,addr_practice.city,addr_practice.zip,gender&maxList=5\")",
+      "Bash(curl -s \"https://clinicaltables.nlm.nih.gov/api/npi_idv/v3/search?terms=Neurology&sf=provider_type,addr_practice.city&q=addr_practice.state:WA+AND+addr_practice.city:SEATTLE&df=NPI,name.full,provider_type,addr_practice.full&ef=name.credential,addr_practice.phone,addr_practice.city&maxList=3\")",
+      "Bash(curl -s \"https://clinicaltables.nlm.nih.gov/api/npi_idv/v3/search?terms=Family+Medicine&sf=provider_type,addr_practice.city&q=addr_practice.state:IL+AND+addr_practice.city:CHICAGO&df=NPI,name.full,provider_type,addr_practice.full&ef=name.credential,addr_practice.phone,addr_practice.city&maxList=3\")"
     ]
   },
   "enabledMcpjsonServers": [

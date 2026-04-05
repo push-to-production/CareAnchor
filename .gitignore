@@ -26,5 +26,7 @@ node_modules/
 .env
 exports/
 
-# ICD-10 RAG index cache (auto-generated from icd10cm_codes_2026.txt)
+# ICD-10 semantic RAG artifacts (regenerate with: make icd-index)
 data/.icd_bm25_index.pkl
+data/.icd_semantic_index.pkl
+data/.symptom_dataset.csv

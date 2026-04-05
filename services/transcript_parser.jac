@@ -29,14 +29,15 @@ def rule_extract_insurance(text: str) -> str {
 }
 
 def rule_extract_location(text: str) -> str {
-    lower = text.lower();
-    state_patterns = [
-        "austin, tx", "austin tx", "denver, co", "denver co",
-        "new york", "los angeles", "chicago", "houston", "phoenix",
-        "philadelphia", "san antonio", "san diego", "dallas", "san jose"
-    ];
-    for pattern in state_patterns {
-        if pattern in lower { return pattern.title(); }
+    # Extract "City, ST" or "City, State" patterns (e.g. "San Francisco, CA" or "Portland, Maine").
+    # One to three Title-Case words followed by a state abbreviation or full state name.
+    matches = re.findall(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2}),\s*([A-Z]{2})\b', text);
+    if not matches {
+        matches = re.findall(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2}),\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b', text);
+    }
+    if matches {
+        locations = [m[0].strip() + ", " + m[1] for m in matches];
+        return " or ".join(locations);
     }
     return "";
 }
@@ -68,7 +69,13 @@ Fields to extract:
 - follow_up_question: a single clarifying question to ask next (location if missing,
   insurance if missing, duration if missing, severity if missing, or "" if all known)
 - enough_for_diagnosis: True only if we have at least 2 symptoms AND location AND insurance
-- location: city and state or zip code, or None
+- location: ALL locations the user mentions they can be seen in, normalized to
+  "City, ST" format with the official USPS two-letter state abbreviation
+  (e.g. "San Francisco, CA", "New York, NY", "Chicago, IL").
+  If the user names a well-known city without a state, infer the primary state
+  (e.g. "San Francisco" → "San Francisco, CA", "Miami" → "Miami, FL").
+  If the user gives multiple locations, join them with " or "
+  (e.g. "Austin, TX or Denver, CO"). Return None if no location is mentioned.
 - insurance: normalized insurance name or None
 - duration: how long symptoms have been present, or None
 - severity: "mild" | "moderate" | "severe" | None
@@ -111,7 +118,11 @@ def build_conversation_state_update(
             llm_result = llm_extract_fields(
                 message, excerpt, merged_symptoms, merged_loc, merged_ins
             );
-            final_loc = first_non_empty(llm_result.location if llm_result.location else "", merged_loc);
+            llm_loc = llm_result.location if llm_result.location else "";
+            # The LLM is the authoritative normalizer: it converts informal city names
+            # to "City, ST" format and resolves multiple locations.
+            # Fall back to the regex result only when the LLM returns nothing.
+            final_loc = first_non_empty(llm_loc, merged_loc);
             final_ins = first_non_empty(llm_result.insurance if llm_result.insurance else "", merged_ins);
             all_syms = list(merged_symptoms);
             for s in llm_result.extracted_symptoms {
