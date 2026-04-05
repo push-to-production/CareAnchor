@@ -44,7 +44,7 @@ def:pub LoginScreen(props: dict) -> JsxElement {
                 if "error" in payload {
                     error = payload["error"];
                 } else {
-                    props["onLogin"](payload["user"]);
+                    props["onLogin"](payload);
                 }
             } else {
                 error = "Unable to sign in. Is the backend running?";

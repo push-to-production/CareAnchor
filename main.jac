@@ -5,7 +5,7 @@ import from os { getenv }
 
 glob _: bool = load_dotenv() or True;
 
-sv import from agents.auth { register_or_login }
+sv import from agents.auth { register_or_login, get_user_by_token, logout }
 sv import from agents.orchestrator {
     create_session,
     process_message,

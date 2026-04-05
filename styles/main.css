@@ -822,3 +822,24 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Header user / sign-out ─────────────────────────────── */
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+.header-phone {
+  font-size: .8rem;
+  opacity: .75;
+  white-space: nowrap;
+}
+.header-signout {
+  background: rgba(255,255,255,.12);
+  color: inherit;
+  border: 1px solid rgba(255,255,255,.3);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.header-signout:hover { background: rgba(255,255,255,.22); opacity: 1; }
