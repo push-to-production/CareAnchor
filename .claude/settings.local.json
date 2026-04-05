@@ -29,7 +29,30 @@
       "Bash(echo \"New server PID: $!\")",
       "Read(//c/Users/yousi/Desktop/JacHacks/**)",
       "Bash(PYTHONIOENCODING=utf-8 PYTHONLEGACYWINDOWSSTDIO=1 jac start CareAnchor/main.jac)",
-      "Bash(echo \"PID: $!\")"
+      "Bash(echo \"PID: $!\")",
+      "mcp__chrome-devtools__list_pages",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__take_screenshot",
+      "mcp__chrome-devtools__take_snapshot",
+      "mcp__chrome-devtools__fill",
+      "mcp__chrome-devtools__click",
+      "mcp__chrome-devtools__press_key",
+      "mcp__chrome-devtools__type_text",
+      "mcp__chrome-devtools__wait_for",
+      "Bash(kill -HUP 6646)",
+      "Bash(kill -0 6646)",
+      "Bash(ps -p 95886 -o command=)",
+      "Bash(kill 95886)",
+      "Bash(curl -s http://localhost:8000/healthz)",
+      "Bash(curl -s http://localhost:8000/)",
+      "Bash(pip show:*)",
+      "Bash(pip install:*)",
+      "Bash(python3 -m pip install sentence-transformers numpy --quiet)",
+      "Bash(python3:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "chrome-devtools",
+    "jac"
+  ]
 }

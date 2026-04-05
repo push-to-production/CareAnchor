@@ -25,3 +25,6 @@ node_modules/
 # Care Bridge
 .env
 exports/
+
+# ICD-10 RAG index cache (auto-generated from icd10cm_codes_2026.txt)
+data/.icd_bm25_index.pkl
