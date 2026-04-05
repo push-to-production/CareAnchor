@@ -62,47 +62,81 @@ def:pub LoginScreen(props: dict) -> JsxElement {
     btn_label: str = "Signing in..." if loading else "Continue";
 
     return <div className="login-screen">
-        <div className="login-card">
-            <div className="login-brand">Care Anchor</div>
-            <p className="login-tagline">AI-powered care coordination</p>
-            <h2 className="login-heading">Sign in or create an account</h2>
-            {error != "" and
-                <div className="error-banner login-error">{error}</div>
-            }
-            <div className="login-field">
-                <label className="login-label" htmlFor="phone">Phone number</label>
-                <input
-                    id="phone"
-                    type="tel"
-                    className="login-input"
-                    placeholder="(555) 000-0000"
-                    value={phone}
-                    onChange={lambda e -> None { phone = format_phone(e["target"]["value"]); }}
-                    onKeyDown={handleKeyDown}
+        <div className="login-shell">
+            <section className="login-hero">
+                <div className="brand-mark">AnchorCare</div>
+                <div className="login-hero__copy">
+                    <div className="login-kicker">HealthAI Dashboard</div>
+                    <h1 className="login-title">Jac-powered care coordination, triage, and follow-through.</h1>
+                    <p className="login-tagline">
+                        Sign in to continue with the same dashboard workspace used for guided chat,
+                        provider matching, crisis escalation, and export-ready summaries.
+                    </p>
+                </div>
+
+                <div className="login-highlights">
+                    <div className="login-highlight">
+                        <span className="login-highlight__label">Guided triage</span>
+                        <strong>Structured symptom intake</strong>
+                    </div>
+                    <div className="login-highlight">
+                        <span className="login-highlight__label">Provider matching</span>
+                        <strong>Location and insurance-aware routing</strong>
+                    </div>
+                    <div className="login-highlight">
+                        <span className="login-highlight__label">Clinical exports</span>
+                        <strong>PDF and JSON handoff artifacts</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section className="login-card panel">
+                <div className="login-badge">Secure access</div>
+                <h2 className="login-heading">Sign in or create an account</h2>
+                <p className="login-subcopy">Use your phone number and password to enter the dashboard.</p>
+
+                {error != "" and
+                    <div className="error-banner login-error">{error}</div>
+                }
+
+                <div className="login-field">
+                    <label className="login-label" htmlFor="phone">Phone number</label>
+                    <input
+                        id="phone"
+                        type="tel"
+                        className="login-input"
+                        placeholder="(555) 000-0000"
+                        value={phone}
+                        onChange={lambda e -> None { phone = format_phone(e["target"]["value"]); }}
+                        onKeyDown={handleKeyDown}
+                        disabled={loading}
+                    />
+                </div>
+
+                <div className="login-field">
+                    <label className="login-label" htmlFor="password">Password</label>
+                    <input
+                        id="password"
+                        type="password"
+                        className="login-input"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={lambda e -> None { password = e["target"]["value"]; }}
+                        onKeyDown={handleKeyDown}
+                        disabled={loading}
+                    />
+                </div>
+
+                <button
+                    className="btn btn--primary login-btn"
+                    onClick={lambda -> None { handleSubmit(); }}
                     disabled={loading}
-                />
-            </div>
-            <div className="login-field">
-                <label className="login-label" htmlFor="password">Password</label>
-                <input
-                    id="password"
-                    type="password"
-                    className="login-input"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={lambda e -> None { password = e["target"]["value"]; }}
-                    onKeyDown={handleKeyDown}
-                    disabled={loading}
-                />
-            </div>
-            <button
-                className="btn btn--primary login-btn"
-                onClick={lambda -> None { handleSubmit(); }}
-                disabled={loading}
-            >
-                {btn_label}
-            </button>
-            <p className="login-note">New here? Just enter your phone and a password to register.</p>
+                >
+                    {btn_label}
+                </button>
+
+                <p className="login-note">New here? Enter your phone number and a password to register on first login.</p>
+            </section>
         </div>
     </div>;
 }

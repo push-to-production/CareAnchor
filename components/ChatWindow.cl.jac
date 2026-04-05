@@ -10,8 +10,10 @@ def:pub ChatWindow(
     activeAgent: str,
     onDraftChange: any,
     onSend: any,
-    onDemo: any,
-    onReset: any
+    onPdf: any,
+    onReset: any,
+    exportStatus: str,
+    exportDisabled: bool
 ) -> JsxElement {
     endRef = useRef(None);
 
@@ -43,7 +45,7 @@ def:pub ChatWindow(
                 <div className="chat-empty-state">
                     <h3>Start with symptoms, location, and insurance.</h3>
                     <p>
-                        Care Anchor will route the conversation through the agent pipeline,
+                        AnchorCare will route the conversation through the agent pipeline,
                         identify risk signals, suggest likely codes, and match providers.
                     </p>
                 </div>
@@ -81,20 +83,28 @@ def:pub ChatWindow(
             </button>
         </div>
 
-        <div className="demo-bar">
-            <span className="demo-bar__label">Demo cases</span>
-            <button type="button" className="btn btn--secondary btn--sm" onClick={lambda -> None { onDemo(1); }} disabled={sending}>
-                Dizziness
-            </button>
-            <button type="button" className="btn btn--secondary btn--sm" onClick={lambda -> None { onDemo(2); }} disabled={sending}>
-                Nausea
-            </button>
-            <button type="button" className="btn btn--crisis btn--sm" onClick={lambda -> None { onDemo(3); }} disabled={sending}>
-                Crisis
-            </button>
-            <button type="button" className="btn btn--secondary btn--sm" style={{"marginLeft": "auto"}} onClick={onReset} disabled={sending}>
-                New Session
-            </button>
+        <div className="chat-actions">
+            <div className="chat-actions__status">
+                {exportStatus}
+            </div>
+            <div className="chat-actions__buttons">
+                <button
+                    type="button"
+                    className="btn btn--secondary btn--sm"
+                    onClick={onReset}
+                    disabled={sending}
+                >
+                    New Session
+                </button>
+                <button
+                    type="button"
+                    className="btn btn--secondary btn--sm"
+                    onClick={onPdf}
+                    disabled={sending or exportDisabled}
+                >
+                    Export PDF
+                </button>
+            </div>
         </div>
     </div>;
 }
