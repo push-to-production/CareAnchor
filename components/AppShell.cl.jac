@@ -38,6 +38,7 @@ import from .AgentTrace { AgentTrace }
 import from .ChatWindow { ChatWindow }
 import from .CrisisBanner { CrisisBanner }
 import from .LoginScreen { LoginScreen, format_phone }
+import from .SessionPdf { build_session_pdf_attachment }
 import from .SummaryPanel { SummaryPanel }
 
 def tab_class(active_tab: str, tab_name: str) -> str {
@@ -69,7 +70,20 @@ def empty_session() -> dict {
         "location": None,
         "insurance": None,
         "summary_text": None,
-        "disclaimer": "AnchorCare supports care coordination. It does not replace emergency care or professional diagnosis."
+        "doctor_notes": None,
+        "disclaimer": "AnchorCare is an AI-powered care coordination platform. It does not replace emergency care or professional diagnosis."
+    };
+}
+
+def build_pdf_chat_message(payload: dict, attachment: dict) -> dict {
+    timestamp = payload["generated_at"] if "generated_at" in payload else "";
+
+    return {
+        "role": "assistant",
+        "content": "Your AnchorCare session summary is ready as a PDF attachment.",
+        "timestamp": timestamp,
+        "agent": "Summary Agent",
+        "attachment": attachment
     };
 }
 
@@ -86,12 +100,14 @@ def:pub AppShell() -> JsxElement {
     has exportStatus: str = "";
     has errorText: str = "";
     has activeTab: str = "chat";
+    has localTranscript: list = [];
 
     async def bootstrap(phone: str) -> None {
         booting = True;
         errorText = "";
         exportStatus = "";
         session = empty_session();
+        localTranscript = [];
         sessionId = "";
         draft = "";
         try {
@@ -134,6 +150,7 @@ def:pub AppShell() -> JsxElement {
         draft = "";
         errorText = "";
         exportStatus = "";
+        localTranscript = [];
     }
 
     async def restoreSession() -> None {
@@ -183,7 +200,25 @@ def:pub AppShell() -> JsxElement {
             result = root spawn export_pdf(session_id=sessionId);
             if result.reports.length > 0 {
                 payload = result.reports[0];
-                exportStatus = "PDF saved: " + payload["file_path"];
+                if "session" in payload {
+                    session = payload["session"];
+                }
+                if "error" in payload {
+                    exportStatus = payload["error"];
+                } elif "html_content" in payload {
+                    attachment = await build_session_pdf_attachment(payload);
+                    if attachment != None {
+                        localTranscript = localTranscript.concat([build_pdf_chat_message(payload, attachment)]);
+                        exportStatus = "PDF ready in chat.";
+                        activeTab = "chat";
+                    } else {
+                        exportStatus = "PDF export failed.";
+                    }
+                } else {
+                    exportStatus = "PDF export failed.";
+                }
+            } else {
+                exportStatus = "PDF export failed.";
             }
         } except Exception as e {
             exportStatus = "PDF export failed.";
@@ -231,20 +266,23 @@ def:pub AppShell() -> JsxElement {
     active_agent = session["active_agent"] if "active_agent" in session else "Conversation Agent";
     intervention_active = session["intervention_active"] if "intervention_active" in session else False;
     risk_flags = session["risk_flags"] if "risk_flags" in session else [];
-    agent_trace = session["agent_trace"] if "agent_trace" in session else [];
-    disclaimer = session["disclaimer"] if "disclaimer" in session else "AnchorCare for triage and care coordination.";
+    disclaimer = session["disclaimer"] if "disclaimer" in session else "AnchorCare is an AI-powered care coordination platform. It does not replace emergency care or professional diagnosis.";
     transcript = session["transcript"] if "transcript" in session else [];
     providers = session["provider_options"] if "provider_options" in session else [];
     summary_text = session["summary_text"] if "summary_text" in session else "";
     session_state = "Preparing session..." if booting else "Session ready";
+    combined_transcript = transcript.concat(localTranscript);
 
     return <div className="dashboard-shell">
         <div className="dashboard-frame">
             <header className="dashboard-header">
-                <div className="dashboard-header__copy">
-                    <div className="brand-mark">ANCHORCARE</div>
-                    <h1>AnchorCare Dashboard</h1>
-                    <p>{disclaimer}</p>
+                <div className="dashboard-header__brand">
+                    <div className="dashboard-header__logo" aria-hidden="true"></div>
+                    <div className="dashboard-header__copy">
+                        <div className="brand-mark">ANCHORCARE</div>
+                        <h1>AnchorCare Dashboard</h1>
+                        <p>{disclaimer}</p>
+                    </div>
                 </div>
 
                 <div className="dashboard-header__controls">
@@ -282,7 +320,7 @@ def:pub AppShell() -> JsxElement {
                 <section className="dashboard-main__primary">
                     {activeTab == "chat" and
                         <ChatWindow
-                            transcript={transcript}
+                            transcript={combined_transcript}
                             draft={draft}
                             sending={sending or booting}
                             activeAgent={active_agent}

@@ -96,6 +96,16 @@ textarea {
   backdrop-filter: blur(14px);
 }
 
+.login-corner-logo {
+  width: clamp(72px, 8vw, 104px);
+  aspect-ratio: 1 / 1;
+  align-self: flex-start;
+  background-image: url("../assets/anchorcare_logo_blck.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
 .login-hero__copy {
   display: flex;
   flex-direction: column;
@@ -242,7 +252,30 @@ textarea {
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
-  padding: 8px 2px;
+  padding: 8px 0;
+}
+
+.dashboard-header__brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-left: -4px;
+}
+
+.dashboard-header__logo {
+  width: clamp(56px, 4vw, 72px);
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(240, 248, 253, 0.78));
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: var(--shadow-sm);
+  background-image: url("../assets/anchorcare_logo_blck.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 72%;
 }
 
 .dashboard-header__copy {
@@ -262,6 +295,7 @@ textarea {
   color: var(--muted);
   font-size: 0.98rem;
   line-height: 1.6;
+  max-width: 700px;
 }
 
 .brand-mark {
@@ -650,6 +684,38 @@ textarea {
   font-size: 0.88em;
 }
 
+.bubble-attachment {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(246, 250, 255, 0.98), rgba(236, 245, 255, 0.95));
+  border: 1px solid rgba(31, 111, 214, 0.14);
+}
+
+.bubble-attachment__eyebrow {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-soft);
+}
+
+.bubble-attachment__title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.bubble-attachment__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .summary-panel {
   display: flex;
   flex-direction: column;
@@ -972,6 +1038,10 @@ textarea {
 
   .dashboard-header {
     flex-direction: column;
+  }
+
+  .dashboard-header__brand {
+    margin-left: 0;
   }
 
   .dashboard-header__controls {

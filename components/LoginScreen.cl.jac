@@ -64,7 +64,7 @@ def:pub LoginScreen(props: dict) -> JsxElement {
     return <div className="login-screen">
         <div className="login-shell">
             <section className="login-hero">
-                <div className="brand-mark">AnchorCare</div>
+                <div className="login-corner-logo" aria-hidden="true"></div>
                 <div className="login-hero__copy">
                     <div className="login-kicker">HealthAI Dashboard</div>
                     <h1 className="login-title">Jac-powered care coordination, triage, and follow-through.</h1>

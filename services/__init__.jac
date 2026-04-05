@@ -9,4 +9,4 @@ import from services.symptom_mapper { build_diagnosis_result, extract_symptom_ke
 import from services.transcript_parser { build_conversation_state_update }
 import from services.provider_matcher { find_providers }
 import from services.json_exporter { write_session_json }
-import from services.pdf_exporter { write_session_pdf }
+import from services.pdf_exporter { build_session_pdf_payload }

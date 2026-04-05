@@ -3,7 +3,7 @@
 import uuid;
 import from datetime { datetime, timezone }
 
-glob APP_DISCLAIMER: str = "Care Anchor supports care coordination. It does not replace emergency care or professional diagnosis.";
+glob APP_DISCLAIMER: str = "AnchorCare is an AI-powered care coordination platform. It does not replace emergency care or professional diagnosis.";
 
 def new_session_id() -> str {
     return str(uuid.uuid4());

@@ -3,7 +3,7 @@
 import from .codes { DiagnosisCode }
 import from .provider { ProviderOption }
 
-glob APP_DISCLAIMER: str = "Care Anchor supports care coordination. It does not replace emergency care or professional diagnosis.";
+glob APP_DISCLAIMER: str = "AnchorCare is an AI-powered care coordination platform. It does not replace emergency care or professional diagnosis.";
 
 obj ChatMessage {
     has role: str;
@@ -77,6 +77,7 @@ node UserSession {
     has location: str | None = None;
     has insurance: str | None = None;
     has summary_text: str | None = None;
+    has doctor_notes: str | None = None;
 }
 
 def append_message(session: UserSession, role: str, content: str, agent: str, ts: str) -> None {
@@ -165,6 +166,7 @@ def session_to_dict(session: UserSession) -> dict {
         "location": session.location,
         "insurance": session.insurance,
         "summary_text": session.summary_text,
+        "doctor_notes": session.doctor_notes,
         "disclaimer": disclaimer
     };
 }
