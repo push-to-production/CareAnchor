@@ -36,7 +36,6 @@ def clear_auth_cookie() -> None {
     document.cookie = "care_anchor_token=; path=/; max-age=0";
 }
 
-import from .AgentTrace { AgentTrace }
 import from .ChatWindow { ChatWindow }
 import from .CrisisBanner { CrisisBanner }
 import from .LoginScreen { LoginScreen, format_phone }
