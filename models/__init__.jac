@@ -2,6 +2,7 @@
 
 import from models.codes { DiagnosisCode }
 import from models.provider { ProviderOption }
+import from models.user { User, user_to_dict }
 import from models.session {
     UserSession,
     ChatMessage,

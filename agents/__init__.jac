@@ -1,5 +1,6 @@
 """Care Anchor agents package."""
 
+import from agents.auth { register_or_login }
 import from agents.intervention { run_intervention_agent, try_resume_from_intervention }
 import from agents.conversation { run_conversation_agent, minimum_fields_ready }
 import from agents.calling { run_calling_agent, build_calling_follow_up }
