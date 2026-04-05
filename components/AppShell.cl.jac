@@ -7,7 +7,6 @@ cl import from react { useEffect }
 sv import from __main__ {
     create_session,
     process_message,
-<<<<<<< HEAD
     export_json,
     export_pdf,
     load_demo,
@@ -33,9 +32,6 @@ def get_auth_cookie() -> str {
 
 def clear_auth_cookie() -> None {
     document.cookie = "care_anchor_token=; path=/; max-age=0";
-=======
-    export_pdf
->>>>>>> e8bfc5e52fa28bdcd9f0a06b751e2d6d4081f8c5
 }
 
 import from .ChatWindow { ChatWindow }
