@@ -1,10 +1,20 @@
 """Marketing landing page for AnchorCare."""
 
+cl import from react { useEffect }
+
 def scroll_to(section_id: str) -> None {
     target = document.getElementById(section_id);
     if target {
         target.scrollIntoView({"behavior": "smooth", "block": "start"});
     }
+}
+
+def reveal_delay_class(index: int) -> str {
+    if index == 0 { return ""; }
+    if index == 1 { return " marketing-reveal--delay-1"; }
+    if index == 2 { return " marketing-reveal--delay-2"; }
+    if index == 3 { return " marketing-reveal--delay-3"; }
+    return " marketing-reveal--delay-4";
 }
 
 def:pub LandingPage(props: dict) -> JsxElement {
@@ -71,6 +81,27 @@ def:pub LandingPage(props: dict) -> JsxElement {
         {"tone": "marketing-activity__dot--mint", "text": "Urgent-risk banner triggered and surfaced guidance", "time": "1 hour ago"}
     ];
 
+    useEffect(lambda -> None {
+        nodes = document.querySelectorAll(".marketing-reveal");
+        if not nodes or nodes.length == 0 { return; }
+
+        observer = Reflect.construct(IntersectionObserver, [
+            lambda entries: any, obs: any -> None {
+                for entry in entries {
+                    if entry.isIntersecting {
+                        entry.target.classList.add("is-visible");
+                        obs.unobserve(entry.target);
+                    }
+                }
+            },
+            {"threshold": 0.16, "rootMargin": "0px 0px -8% 0px"}
+        ]);
+
+        for node in nodes {
+            observer.observe(node);
+        }
+    }, []);
+
     return <div className="marketing-page">
         <div className="marketing-page__bg" aria-hidden="true">
             <div className="marketing-orb marketing-orb--one"></div>
@@ -103,7 +134,7 @@ def:pub LandingPage(props: dict) -> JsxElement {
 
         <section className="marketing-hero">
             <div className="marketing-container marketing-hero__grid">
-                <div className="marketing-hero__copy">
+                <div className="marketing-hero__copy marketing-reveal marketing-reveal--left">
                     <div className="login-kicker">Jac-powered care coordination</div>
                     <h1 className="marketing-hero__title">
                         Turn symptoms, uncertainty, and follow-up chaos into structured next steps.
@@ -130,7 +161,7 @@ def:pub LandingPage(props: dict) -> JsxElement {
                     </div>
                 </div>
 
-                <div className="marketing-preview">
+                <div className="marketing-preview marketing-reveal marketing-reveal--right marketing-reveal--delay-1">
                     <div className="marketing-preview__frame panel panel--glass">
                         <div className="marketing-preview__header">
                             <div>
@@ -172,27 +203,27 @@ def:pub LandingPage(props: dict) -> JsxElement {
 
         <section id="how-it-works" className="marketing-section">
             <div className="marketing-container">
-                <div className="marketing-section__head">
+                <div className="marketing-section__head marketing-reveal">
                     <div className="marketing-pill">How it works</div>
                     <h2>From symptom intake to care handoff in four steps</h2>
                 </div>
 
                 <div className="marketing-step-grid">
-                    {[<article key={step["title"]} className="marketing-card marketing-step">
+                    {[<article key={step["title"]} className={"marketing-card marketing-step marketing-reveal" + reveal_delay_class(i)}>
                         <div className="marketing-step__meta">
                             <span className="marketing-step__index">{step["eyebrow"]}</span>
                             <span className={"marketing-step__code" + (" marketing-step__code--risk" if step["code"] == "RISK" else "")}>{step["code"]}</span>
                         </div>
                         <h3>{step["title"]}</h3>
                         <p>{step["description"]}</p>
-                    </article> for step in steps]}
+                    </article> for (i, step) in enumerate(steps)]}
                 </div>
             </div>
         </section>
 
         <section id="features" className="marketing-section marketing-section--tinted">
             <div className="marketing-container">
-                <div className="marketing-section__head marketing-section__head--wide">
+                <div className="marketing-section__head marketing-section__head--wide marketing-reveal">
                     <div className="marketing-pill">Features</div>
                     <h2>Everything the app needs to explain and coordinate care clearly</h2>
                     <p>
@@ -202,36 +233,36 @@ def:pub LandingPage(props: dict) -> JsxElement {
                 </div>
 
                 <div className="marketing-feature-grid">
-                    {[<article key={feature["title"]} className="marketing-card marketing-feature">
+                    {[<article key={feature["title"]} className={"marketing-card marketing-feature marketing-reveal" + reveal_delay_class(i)}>
                         <div className="marketing-feature__icon">{feature["code"]}</div>
                         <h3>{feature["title"]}</h3>
                         <p>{feature["description"]}</p>
-                    </article> for feature in features]}
+                    </article> for (i, feature) in enumerate(features)]}
                 </div>
             </div>
         </section>
 
         <section id="why-anchorcare" className="marketing-section">
             <div className="marketing-container">
-                <div className="marketing-section__head">
+                <div className="marketing-section__head marketing-reveal">
                     <div className="marketing-pill">Why AnchorCare</div>
                     <h2>Built for clarity when care decisions feel fragmented</h2>
                 </div>
 
                 <div className="marketing-value-grid">
-                    <div className="marketing-value">
+                    <div className="marketing-value marketing-reveal">
                         <strong>Speed</strong>
                         <p>Users move from uncertainty to next steps quickly instead of bouncing between search results, portals, and phone calls.</p>
                     </div>
-                    <div className="marketing-value">
+                    <div className="marketing-value marketing-reveal marketing-reveal--delay-1">
                         <strong>Trust</strong>
                         <p>Safety messaging stays visible, urgent risk is not buried, and the system is explicit about what it can and cannot do.</p>
                     </div>
-                    <div className="marketing-value">
+                    <div className="marketing-value marketing-reveal marketing-reveal--delay-2">
                         <strong>Coordination</strong>
                         <p>Session summaries, provider options, and structured notes stay in one Jac-driven workspace for follow-through.</p>
                     </div>
-                    <div className="marketing-value">
+                    <div className="marketing-value marketing-reveal marketing-reveal--delay-3">
                         <strong>Explainability</strong>
                         <p>The app is not a black box pitch deck. It shows concrete workflow outputs users can understand and share.</p>
                     </div>
@@ -241,8 +272,8 @@ def:pub LandingPage(props: dict) -> JsxElement {
 
         <section id="dashboard-preview" className="marketing-section marketing-section--tinted">
             <div className="marketing-container">
-                <div className="marketing-dashboard panel panel--glass">
-                    <div className="marketing-dashboard__copy">
+                <div className="marketing-dashboard panel panel--glass marketing-reveal">
+                    <div className="marketing-dashboard__copy marketing-reveal marketing-reveal--delay-1">
                         <div className="marketing-pill">Dashboard preview</div>
                         <h2>A single workspace for triage, routing, and follow-through</h2>
                         <p>
@@ -251,7 +282,7 @@ def:pub LandingPage(props: dict) -> JsxElement {
                         </p>
                     </div>
 
-                    <div className="marketing-dashboard__image-frame">
+                    <div className="marketing-dashboard__image-frame marketing-reveal marketing-reveal--delay-2">
                         <img
                             className="marketing-dashboard__image"
                             src="/dashboard-preview.png"
@@ -260,19 +291,19 @@ def:pub LandingPage(props: dict) -> JsxElement {
                     </div>
 
                     <div className="marketing-dashboard__grid">
-                        <div className="marketing-dashboard__panel">
+                        <div className="marketing-dashboard__panel marketing-reveal marketing-reveal--delay-1">
                             <span>Care conversation</span>
                             <strong>Structured symptom intake with live agent routing</strong>
                         </div>
-                        <div className="marketing-dashboard__panel">
+                        <div className="marketing-dashboard__panel marketing-reveal marketing-reveal--delay-2">
                             <span>Provider options</span>
                             <strong>Insurance-aware results with practical next-care choices</strong>
                         </div>
-                        <div className="marketing-dashboard__panel">
+                        <div className="marketing-dashboard__panel marketing-reveal marketing-reveal--delay-3">
                             <span>Safety layer</span>
                             <strong>Crisis escalation stays visible when risk indicators appear</strong>
                         </div>
-                        <div className="marketing-dashboard__panel">
+                        <div className="marketing-dashboard__panel marketing-reveal marketing-reveal--delay-4">
                             <span>Exports</span>
                             <strong>PDF and JSON handoff artifacts for providers and records</strong>
                         </div>
@@ -283,8 +314,8 @@ def:pub LandingPage(props: dict) -> JsxElement {
 
         <section className="marketing-section marketing-section--tinted">
             <div className="marketing-container">
-                <div className="marketing-cta">
-                    <div className="marketing-cta__copy">
+                <div className="marketing-cta marketing-reveal">
+                    <div className="marketing-cta__copy marketing-reveal marketing-reveal--delay-1">
                         <div className="marketing-pill marketing-pill--inverse">Ready to start</div>
                         <h2>Open the dedicated login page and continue into your AnchorCare dashboard.</h2>
                         <p>
@@ -293,7 +324,7 @@ def:pub LandingPage(props: dict) -> JsxElement {
                         </p>
                     </div>
 
-                    <div className="marketing-cta__actions">
+                    <div className="marketing-cta__actions marketing-reveal marketing-reveal--delay-2">
                         <button type="button" className="btn btn--light marketing-cta__primary" onClick={lambda -> None { props["onGetStarted"](); }}>Get Started</button>
                         <button type="button" className="btn btn--ghost marketing-cta__secondary" onClick={lambda -> None { props["onSignIn"](); }}>Sign In</button>
                     </div>
@@ -302,7 +333,7 @@ def:pub LandingPage(props: dict) -> JsxElement {
         </section>
 
         <footer className="marketing-footer">
-            <div className="marketing-container marketing-footer__inner">
+            <div className="marketing-container marketing-footer__inner marketing-reveal">
                 <div className="marketing-brand">
                     <div className="marketing-brand__mark marketing-brand__mark--sm" aria-hidden="true"></div>
                     <div className="marketing-brand__copy">
