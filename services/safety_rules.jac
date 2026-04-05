@@ -4,7 +4,7 @@ import from models.session { InterventionDecision }
 import from .common { normalize_text }
 import from byllm.lib { Model }
 
-glob llm: Model = Model(model_name="ollama/llama3.2");
+glob llm: Model = Model(model_name="ollama/llama2-uncensored:7b");
 
 glob CRISIS_RESPONSE_MARKDOWN: str = "**Immediate support**\n\nI'm sorry you're going through this. If you're in immediate danger, call **911** or go to the nearest emergency room.\n\nIn the U.S., call or text **988** right now for the Suicide & Crisis Lifeline — it's free and available 24/7.\n\n**Are you in immediate danger right now?**";
 
