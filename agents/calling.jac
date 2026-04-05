@@ -3,10 +3,7 @@
 import from models.session { UserSession, CallingPreparation }
 import from services.provider_matcher { normalize_insurance }
 import from services.common { transcript_excerpt }
-import from byllm.lib { Model }
-
 glob LLM_READY: bool = True;
-glob llm: Model = Model(model_name="ollama/llama3.2");
 
 """You are Care Anchor, a compassionate medical intake assistant. You have at most 3 exchanges to gather enough information for a care recommendation.
 

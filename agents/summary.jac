@@ -3,10 +3,7 @@
 import from os { getenv }
 import from models.session { UserSession, CareSummary }
 import from services.common { transcript_excerpt, APP_DISCLAIMER }
-import from byllm.lib { Model }
-
 glob LLM_READY: bool = True;
-glob llm: Model = Model(model_name="ollama/llama3.2");
 
 """Write a 3-sentence plain-English care coordination summary for a patient.
 Include: what symptoms were reported, what conditions were identified, and what

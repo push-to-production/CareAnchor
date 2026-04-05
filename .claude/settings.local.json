@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /c/Users/yousi/Desktop/JacHacks/CareAnchor/*.md)",
+      "Bash(jac check:*)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(timeout 15 jac start main.jac --no-client)",
+      "Bash(echo \"EXIT_CODE: $?\")",
+      "Bash(timeout 15 jac start main.jac)",
+      "Bash(PYTHONIOENCODING=utf-8 timeout 15 jac start main.jac)",
+      "Bash(Read \"C:/Users/yousi/AppData/Local/Temp/claude/c--Users-yousi-Desktop-JacHacks-CareAnchor/97696e84-e0b5-4d44-b897-d24fc0229db1/tasks/bskpc217b.output\")",
+      "Bash(PYTHONIOENCODING=utf-8 timeout 30 jac start main.jac)",
+      "Bash(PYTHONIOENCODING=utf-8 timeout 15 jac run main.jac)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":8000 \")",
+      "Bash(tasklist /FI \"PID eq 5240\")",
+      "Bash(powershell -Command \"Get-Process -Id 5240 | Select-Object Name, Id, MainWindowTitle\")",
+      "Bash(jac start:*)",
+      "Bash(echo \"Server PID: $!\")",
+      "Bash(curl -s -X POST http://localhost:8080/walker/create_session -H 'Content-Type: application/json' -d '{}')",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s http://localhost:8080/docs)",
+      "Bash(curl -s http://localhost:8080/openapi.json)",
+      "Bash(python -c ':*)",
+      "Bash(curl -s -X POST http://localhost:8080/user/register -H 'Content-Type: application/json' -d '{\"email\":\"test@test.com\",\"password\":\"Test1234!\"}')",
+      "Bash(curl -s -X POST http://localhost:8080/user/login -H 'Content-Type: application/json' -d '{\"email\":\"test@test.com\",\"password\":\"Test1234!\"}')",
+      "Bash(pkill -f \"jac start\")",
+      "Bash(PYTHONIOENCODING=utf-8 PYTHONLEGACYWINDOWSSTDIO=1 jac start main.jac)",
+      "Bash(echo \"New server PID: $!\")",
+      "Read(//c/Users/yousi/Desktop/JacHacks/**)",
+      "Bash(PYTHONIOENCODING=utf-8 PYTHONLEGACYWINDOWSSTDIO=1 jac start CareAnchor/main.jac)",
+      "Bash(echo \"PID: $!\")"
+    ]
+  }
+}
