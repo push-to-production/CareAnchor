@@ -15,12 +15,10 @@ def run_diagnosis_agent(session: UserSession) -> DiagnosisResult {
     session.assigned_codes = result.symptom_codes;
 
     loc = session.location if session.location else "";
-    ins = session.insurance if session.insurance else "";
 
     providers = find_providers(
         diagnosis=result,
         location=loc,
-        insurance=ins,
         max_results=4
     );
     session.provider_options = providers;

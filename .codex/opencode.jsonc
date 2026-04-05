@@ -4,10 +4,11 @@
   "server": {
     "port": 4096,
   },
+  "plugin": ["opencode-browser"],
   "mcp": {
-    "chrome-devtools": {
+    "browsermcp": {
       "type": "local",
-      "command": ["npx", "-y", "chrome-devtools-mcp@latest"]
+      "command": ["npx", "@browsermcp/mcp@latest"]
     }
   }
 }

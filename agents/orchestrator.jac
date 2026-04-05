@@ -9,7 +9,6 @@ import from .intervention { run_intervention_agent, try_resume_from_intervention
 import from .calling { run_calling_agent, build_calling_follow_up }
 import from .diagnosis { run_diagnosis_agent }
 import from .messaging { run_messaging_agent }
-import from .summary { run_summary_agent }
 
 def find_session(sid: str) -> UserSession | None {
     anchor = root();
@@ -56,23 +55,14 @@ def run_pipeline(session: UserSession, message: str) -> dict {
     run_conversation_agent(session, message);
     calling = run_calling_agent(session);
 
-    user_turns = 0;
-    for m in session.transcript {
-        role = m["role"] if isinstance(m, dict) else m.role;
-        if role == "user" { user_turns += 1; }
-    }
-    force_diagnosis = user_turns >= 2 and len(session.extracted_symptoms) > 0;
-    ready_now = (len(session.extracted_symptoms) > 0) and calling.provider_search_ready;
-
-    if not ready_now and not force_diagnosis {
+    if not calling.provider_search_ready {
         reply = build_calling_follow_up(session, calling);
         append_message(session, "assistant", reply, "Calling Agent", iso_now());
         return build_payload(session, reply, False);
     }
 
     diagnosis = run_diagnosis_agent(session);
-    summary_text = run_summary_agent(session);
-    reply = run_messaging_agent(session, diagnosis, summary_text);
+    reply = run_messaging_agent(session, diagnosis);
     append_message(session, "assistant", reply, "Messaging Agent", iso_now());
     return build_payload(session, reply, False);
 }
@@ -87,7 +77,7 @@ walker :pub create_session {
         session = created[0];
         session.active_agent = "Conversation Agent";
         session.agent_path = ["Conversation Agent:active"];
-        welcome = "Hi, I'm Care Anchor. Tell me your symptoms, and when you can, share your city/state and insurance so I can find providers near you.";
+        welcome = "Hi, I'm Care Anchor. Tell me your symptoms and share your city/state so I can find providers near you.";
         append_message(session, "assistant", welcome, "Conversation Agent", now);
         session.agent_path.append("Conversation Agent:completed");
         commit();
@@ -149,20 +139,10 @@ walker :pub export_pdf {
             report {"error": "Session not found"};
             disengage;
         }
-        if session.summary_text == None or session.summary_text.strip() == "" {
-            run_summary_agent(session);
-        }
-        import from services.pdf_exporter { build_session_pdf_payload }
-        payload = build_session_pdf_payload(session);
-        payload["session"] = session_to_dict(session);
-        if session.summary_text == None or session.summary_text.strip() == "" {
-            run_summary_agent(session);
-        }
         import from services.pdf_exporter { build_session_pdf_payload }
         payload = build_session_pdf_payload(session);
         payload["session"] = session_to_dict(session);
         commit();
-        report payload;
         report payload;
     }
 }
@@ -176,8 +156,8 @@ walker :pub load_demo {
         created = root ++> UserSession(session_id=sid, created_at=now, updated_at=now);
         session = created[0];
         messages = [
-            "I've been dizzy for two days and I missed one of my blood pressure pills. I'm in Austin, TX and have Aetna.",
-            "I've had nausea and stomach pain since yesterday evening. I'm in Denver, CO with Blue Cross.",
+            "I've been dizzy for two days and I missed one of my blood pressure pills. I'm in Austin, TX.",
+            "I've had nausea and stomach pain since yesterday evening. I'm in Denver, CO.",
             "I feel like I want to die. Nothing is worth it anymore."
         ];
         msg = messages[0];

@@ -11,8 +11,7 @@ def run_conversation_agent(session: UserSession, message: str) -> ConversationSt
         message=message,
         transcript_messages=session.transcript,
         known_symptoms=session.extracted_symptoms,
-        known_location=session.location,
-        known_insurance=session.insurance
+        known_location=session.location
     );
 
     for sym in update.extracted_symptoms {
@@ -23,9 +22,6 @@ def run_conversation_agent(session: UserSession, message: str) -> ConversationSt
 
     if update.location and update.location != "" {
         session.location = update.location;
-    }
-    if update.insurance and update.insurance != "" {
-        session.insurance = update.insurance;
     }
     if update.duration and update.duration != "" {
         session.symptom_duration = update.duration;
@@ -41,6 +37,5 @@ def run_conversation_agent(session: UserSession, message: str) -> ConversationSt
 def minimum_fields_ready(session: UserSession) -> bool {
     has_symptoms = len(session.extracted_symptoms) > 0;
     has_location = session.location != None and session.location != "";
-    has_insurance = session.insurance != None and session.insurance != "";
-    return has_symptoms and has_location and has_insurance;
+    return has_symptoms and has_location;
 }

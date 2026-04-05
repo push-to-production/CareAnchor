@@ -54,14 +54,12 @@ def _provider_lines(p: any) -> list {
 
 def run_messaging_agent(
     session: UserSession,
-    diagnosis: DiagnosisResult,
-    summary_text: str
+    diagnosis: DiagnosisResult
 ) -> str {
     session.active_agent = "Messaging Agent";
     session.agent_path.append("Messaging Agent:active");
 
     loc = session.location if session.location else "your area";
-    ins = session.insurance if session.insurance else "your insurance";
     lines: list = [];
 
     # What the patient reported
@@ -84,14 +82,14 @@ def run_messaging_agent(
 
     # Matched providers
     if session.provider_options {
-        lines.append("\n## Providers near " + loc + " accepting " + ins);
+        lines.append("\n## Providers near " + loc);
         for p in session.provider_options[:3] {
             for ln in _provider_lines(p) {
                 lines.append(ln);
             }
         }
     } else {
-        lines.append("\n*No providers found for your location and insurance. Try calling 211 for local referrals.*");
+        lines.append("\n*No providers found for your location. Try calling 211 for local referrals.*");
     }
 
     # Disclaimer

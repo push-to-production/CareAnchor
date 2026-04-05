@@ -4,7 +4,6 @@ import from models.session { InterventionDecision }
 import from .common { normalize_text }
 import from byllm.lib { Model }
 
-glob llm: Model = Model(model_name="ollama/llama2-uncensored:7b");
 
 glob CRISIS_RESPONSE_MARKDOWN: str = "**Immediate support**\n\nI'm sorry you're going through this. If you're in immediate danger, call **911** or go to the nearest emergency room.\n\nIn the U.S., call or text **988** right now for the Suicide & Crisis Lifeline — it's free and available 24/7.\n\n**Are you in immediate danger right now?**";
 
@@ -49,17 +48,20 @@ that requires immediate safety intervention — such as suicidal ideation, self-
 expressions of hopelessness or despair severe enough that the person may be at risk of harming
 themselves.
 
-Set is_crisis=True if the message — literally or contextually — suggests the person may harm
+Set is_crisis=True ONLY if the message clearly suggests the person may intentionally harm
 themselves, no longer wants to live, or is expressing active suicidal or self-harm intent.
 
-Set is_crisis=False for:
-- Normal medical complaints (pain, illness, injury)
+Set is_crisis=False for ALL of the following:
+- Physical injuries or accidents (broken bones, cuts, burns, sprains, etc.)
+- Normal medical complaints (pain, illness, fever, nausea, dizziness, etc.)
+- Chronic conditions or symptoms (headaches, back pain, stomach issues, etc.)
 - Figurative speech ("I'm dying of hunger", "this headache is killing me")
-- General frustration or sadness without self-harm intent
+- General frustration, sadness, or stress without self-harm intent
 - Questions about mental health in the abstract
+- Describing past self-harm without current intent
 
-When genuinely uncertain whether someone is at risk, set is_crisis=True and err on the side of
-safety.
+Do NOT flag physical injuries as crisis. "I broke my wrist" is NOT a crisis.
+Do NOT flag symptoms as crisis. "I have chest pain" is NOT a crisis.
 
 Set reason to a short phrase describing why you made the decision.
 Set urgency to "high" if is_crisis is True, otherwise "routine".

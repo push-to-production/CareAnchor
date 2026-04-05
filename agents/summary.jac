@@ -49,6 +49,13 @@ def _build_summary(session: UserSession, code_labels: list, specs: list) -> str 
 }
 
 def run_summary_agent(session: UserSession) -> str {
+    if not session.location or session.location.strip() == "" {
+        return session.summary_text if session.summary_text else "";
+    }
+    if not session.assigned_codes or len(session.assigned_codes) == 0 {
+        return session.summary_text if session.summary_text else "";
+    }
+
     session.agent_path.append("Summary Agent:active");
 
     code_labels: list = [];
