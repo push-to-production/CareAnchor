@@ -61,7 +61,14 @@
       "Bash(curl -s \"https://clinicaltables.nlm.nih.gov/api/npi_idv/v3/search?terms=Family+Medicine&sf=provider_type,addr_practice.city&q=addr_practice.state:IL+AND+addr_practice.city:CHICAGO&df=NPI,name.full,provider_type,addr_practice.full&ef=name.credential,addr_practice.phone,addr_practice.city&maxList=3\")",
       "mcp__chrome-devtools__list_network_requests",
       "mcp__chrome-devtools__get_network_request",
-      "mcp__chrome-devtools__new_page"
+      "mcp__chrome-devtools__new_page",
+      "mcp__chrome-devtools__select_page",
+      "mcp__chrome-devtools__list_console_messages",
+      "mcp__chrome-devtools__get_console_message",
+      "Bash(find /Users/cmsmallegan/Documents/Hackathon/care_anchor -name *.cache -o -name .jac_cache -o -name __jac_gen__)",
+      "Bash(ls /Users/cmsmallegan/Documents/Hackathon/care_anchor/.jac*)",
+      "mcp__chrome-devtools__evaluate_script",
+      "Bash(find /Users/cmsmallegan/Documents/Hackathon/care_anchor/.jac/client -name *.js -not -path */node_modules/*)"
     ]
   },
   "enabledMcpjsonServers": [

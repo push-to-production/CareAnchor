@@ -23,6 +23,7 @@ zod = "^4.3.6"
 marked = "^9.1.6"
 "@react-pdf/renderer" = "^4.3.3"
 react-pdf-html = "^2.1.5"
+jac-client-node = "1.0.7"
 
 [dependencies.npm.dev]
 vite = "^6.4.1"
@@ -30,6 +31,7 @@ vite = "^6.4.1"
 typescript = "^5.3.3"
 "@types/react" = "^18.2.0"
 "@types/react-dom" = "^18.2.0"
+"@jac-client/dev-deps" = "2.0.0"
 
 [dev-dependencies]
 watchdog = ">=3.0.0"
