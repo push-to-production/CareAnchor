@@ -32,6 +32,8 @@ def run_pipeline(session: UserSession, message: str) -> dict {
     session.last_user_message = message;
     update_session_timestamp(session, now);
 
+    run_conversation_agent(session, message);
+
     intervention = run_intervention_agent(session, message);
     if intervention["triggered"] {
         decision = intervention["decision"];
@@ -47,7 +49,6 @@ def run_pipeline(session: UserSession, message: str) -> dict {
     }
 
     if session.intervention_active {
-        run_conversation_agent(session, message);
         if not session.crisis_therapists_shown and session.location and session.location != "" {
             reply = run_therapist_search(session);
             append_message(session, "assistant", reply, "Intervention Agent", iso_now());
@@ -58,7 +59,6 @@ def run_pipeline(session: UserSession, message: str) -> dict {
         return build_payload(session, hold, True);
     }
 
-    run_conversation_agent(session, message);
     calling = run_calling_agent(session);
 
     if not calling.provider_search_ready {
