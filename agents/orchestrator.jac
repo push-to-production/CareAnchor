@@ -77,10 +77,12 @@ def run_pipeline(session: UserSession, message: str) -> dict {
 }
 
 walker :pub create_session {
+    has phone_number: str = "";
+
     can start with Root entry {
         sid = new_session_id();
         now = iso_now();
-        created = root ++> UserSession(session_id=sid, created_at=now, updated_at=now);
+        created = root ++> UserSession(session_id=sid, phone_number=self.phone_number, created_at=now, updated_at=now);
         session = created[0];
         session.active_agent = "Conversation Agent";
         session.agent_path = ["Conversation Agent:active"];

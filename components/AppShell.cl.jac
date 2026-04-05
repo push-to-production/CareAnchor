@@ -1,8 +1,7 @@
-"""Root application shell. Owns all session state."""
+"""Root application shell. Owns all session and auth state."""
 
 import "../styles/main.css";
 
-cl import from react { useEffect }
 sv import from __main__ {
     create_session,
     process_message,
@@ -15,6 +14,7 @@ import from .AgentTrace { AgentTrace }
 import from .ChatWindow { ChatWindow }
 import from .CrisisBanner { CrisisBanner }
 import from .ExportButtons { ExportButtons }
+import from .LoginScreen { LoginScreen, format_phone }
 import from .SummaryPanel { SummaryPanel }
 
 def empty_session() -> dict {
@@ -43,15 +43,18 @@ def empty_session() -> dict {
 }
 
 def:pub AppShell() -> JsxElement {
+    has loggedIn: bool = false;
+    has phoneNumber: str = "";
+    has userId: str = "";
     has sessionId: str = "";
     has session: dict = empty_session();
     has draft: str = "";
     has sending: bool = False;
-    has booting: bool = True;
+    has booting: bool = False;
     has exportStatus: str = "";
     has errorText: str = "";
 
-    async def bootstrap() -> None {
+    async def bootstrap(phone: str) -> None {
         booting = True;
         errorText = "";
         exportStatus = "";
@@ -59,7 +62,7 @@ def:pub AppShell() -> JsxElement {
         sessionId = "";
         draft = "";
         try {
-            result = root spawn create_session();
+            result = root spawn create_session(phone_number=phone);
             if result.reports.length > 0 {
                 payload = result.reports[0];
                 sessionId = payload["session_id"];
@@ -71,6 +74,24 @@ def:pub AppShell() -> JsxElement {
             errorText = "Connection error. Please check that the backend is running.";
         }
         booting = False;
+    }
+
+    def handleLogin(user: dict) -> None {
+        phoneNumber = user["phone_number"];
+        userId = user["user_id"];
+        loggedIn = true;
+        bootstrap(user["phone_number"]);
+    }
+
+    def handleLogout() -> None {
+        loggedIn = false;
+        phoneNumber = "";
+        userId = "";
+        sessionId = "";
+        session = empty_session();
+        draft = "";
+        errorText = "";
+        exportStatus = "";
     }
 
     async def send_message() -> None {
@@ -142,7 +163,9 @@ def:pub AppShell() -> JsxElement {
         }
     }
 
-    useEffect(lambda -> None { bootstrap(); }, []);
+    if not loggedIn {
+        return <LoginScreen onLogin={handleLogin} />;
+    }
 
     active_agent = session["active_agent"] if "active_agent" in session else "Conversation Agent";
     intervention_active = session["intervention_active"] if "intervention_active" in session else False;
@@ -153,6 +176,10 @@ def:pub AppShell() -> JsxElement {
         <header className="hero">
             <div className="brand">Care Anchor</div>
             <p className="hero-copy">{disclaimer}</p>
+            <div className="hero-actions">
+                <span className="hero-user">{format_phone(phoneNumber)}</span>
+                <button className="btn btn--secondary btn--sm hero-signout" onClick={lambda -> None { handleLogout(); }}>Sign out</button>
+            </div>
         </header>
 
         <CrisisBanner active={intervention_active} riskFlags={risk_flags} />
@@ -171,7 +198,7 @@ def:pub AppShell() -> JsxElement {
                     onDraftChange={lambda value: str -> None { draft = value; }}
                     onSend={lambda -> None { send_message(); }}
                     onDemo={lambda case_id: int -> None { run_demo(case_id); }}
-                    onReset={lambda -> None { bootstrap(); }}
+                    onReset={lambda -> None { bootstrap(phoneNumber); }}
                 />
             </div>
             <aside className="workspace__side">
