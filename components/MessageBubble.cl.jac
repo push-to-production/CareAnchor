@@ -28,13 +28,45 @@ def MdBody(msg: dict) -> JsxElement {
     return <span>{text}</span>;
 }
 
+def PdfAttachmentCard(attachment: dict) -> JsxElement {
+    label = attachment["label"] if "label" in attachment else "care_anchor_summary.pdf";
+    href = attachment["href"] if "href" in attachment else "#";
+    download_name = attachment["download_name"] if "download_name" in attachment else label;
+
+    return <div className="bubble-attachment">
+        <div className="bubble-attachment__eyebrow">PDF export</div>
+        <div className="bubble-attachment__title">{label}</div>
+        <div className="bubble-attachment__actions">
+            <a
+                className="btn btn--secondary btn--sm"
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+            >
+                Open PDF
+            </a>
+            <a
+                className="btn btn--secondary btn--sm"
+                href={href}
+                download={download_name}
+            >
+                Download
+            </a>
+        </div>
+    </div>;
+}
+
 def:pub MessageBubble(msg: dict) -> JsxElement {
     role = msg["role"] if "role" in msg else "assistant";
     timestamp = msg["timestamp"] if "timestamp" in msg else "";
     agent = msg["agent"] if "agent" in msg else "";
+    attachment = msg["attachment"] if "attachment" in msg else None;
 
     return <div className={bubble_class(role, agent)}>
-        <div className="bubble__body"><MdBody msg={msg} /></div>
+        <div className="bubble__body">
+            <MdBody msg={msg} />
+            {attachment != None and <PdfAttachmentCard attachment={attachment} />}
+        </div>
         <div className="bubble__meta">
             {agent != "" and <span>{agent} · </span>}
             <span>{format_time(timestamp)}</span>

@@ -148,10 +148,14 @@ walker :pub export_pdf {
             report {"error": "Session not found"};
             disengage;
         }
-        import from services.pdf_exporter { write_session_pdf }
-        path = write_session_pdf(session);
+        if session.summary_text == None or session.summary_text.strip() == "" {
+            run_summary_agent(session);
+        }
+        import from services.pdf_exporter { build_session_pdf_payload }
+        payload = build_session_pdf_payload(session);
+        payload["session"] = session_to_dict(session);
         commit();
-        report {"file_path": path, "session_id": self.session_id};
+        report payload;
     }
 }
 
