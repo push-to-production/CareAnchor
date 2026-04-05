@@ -66,7 +66,7 @@ def:pub LoginScreen(props: dict) -> JsxElement {
             <section className="login-hero">
                 <div className="login-corner-logo" aria-hidden="true"></div>
                 <div className="login-hero__copy">
-                    <div className="login-kicker">HealthAI Dashboard</div>
+                    <div className="login-kicker">AnchorCare Dashboard</div>
                     <h1 className="login-title">Jac-powered care coordination, triage, and follow-through.</h1>
                     <p className="login-tagline">
                         Sign in to continue with the same dashboard workspace used for guided chat,
@@ -84,7 +84,7 @@ def:pub LoginScreen(props: dict) -> JsxElement {
                         <strong>Location and insurance-aware routing</strong>
                     </div>
                     <div className="login-highlight">
-                        <span className="login-highlight__label">Clinical exports</span>
+                        <span className="login-highlight__label">PDF handoff artifacts</span>
                         <strong>PDF and JSON handoff artifacts</strong>
                     </div>
                 </div>
