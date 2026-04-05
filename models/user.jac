@@ -7,6 +7,7 @@ node User {
     has user_id: str;
     has created_at: str;
     has password_hash: str = "";
+    has session_token: str = "";
 }
 
 def hash_password(password: str) -> str {
