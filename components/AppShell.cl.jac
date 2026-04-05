@@ -167,16 +167,30 @@ def:pub AppShell() -> JsxElement {
         booting = False;
     }
 
-    def handleLogin(payload: dict) -> None {
-        user = payload["user"];
-        token = payload["token"] if "token" in payload else "";
+    def setAuthState(user: dict, token: str) -> None {
         phoneNumber = user["phone_number"];
         userId = user["user_id"];
         authToken = token;
         if token != "" { set_auth_cookie(token); }
         loggedIn = true;
-        fetchSessions(user["phone_number"]);
-        showSessions = true;
+    }
+
+    def handleLogin(payload: dict) -> None {
+        user = payload["user"];
+        token = payload["token"] if "token" in payload else "";
+        setAuthState(user, token);
+        showSessions = false;
+        pastSessions = [];
+        bootstrap(user["phone_number"]);
+    }
+
+    def handleRestoreLogin(payload: dict) -> None {
+        user = payload["user"];
+        token = payload["token"] if "token" in payload else "";
+        setAuthState(user, token);
+        showSessions = false;
+        pastSessions = [];
+        bootstrap(user["phone_number"]);
     }
 
     async def handleLogout() -> None {
@@ -206,7 +220,7 @@ def:pub AppShell() -> JsxElement {
             if result.reports.length > 0 {
                 payload = result.reports[0];
                 if "user" in payload {
-                    handleLogin({"user": payload["user"], "token": token});
+                    handleRestoreLogin({"user": payload["user"], "token": token});
                 } else {
                     clear_auth_cookie();
                 }
@@ -326,6 +340,19 @@ def:pub AppShell() -> JsxElement {
                 </div>
             </header>
             <div className="session-chooser__body">
+                <section className="session-chooser__hero panel panel--glass">
+                    <div className="session-chooser__hero-copy">
+                        <div className="panel__eyebrow">Care coordination workspace</div>
+                        <h1 className="session-chooser__title">Sessions</h1>
+                        <p className="session-chooser__subtitle">Review previous conversations and continue care coordination.</p>
+                    </div>
+                    <div className="session-chooser__hero-meta">
+                        <div className="session-chooser__stat">
+                            <span>Saved sessions</span>
+                            <strong>{String(pastSessions.length)}</strong>
+                        </div>
+                    </div>
+                </section>
                 <SessionList
                     sessions={pastSessions}
                     currentSessionId={sessionId}
