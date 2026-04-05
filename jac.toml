@@ -40,4 +40,4 @@ port = 8000
 port = 5173
 
 [plugins.byllm]
-model_name = "ollama/llama3.2"
+model_name = "ollama/llama2-uncensored:7b"
