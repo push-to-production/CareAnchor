@@ -2,12 +2,36 @@
 
 import "../styles/main.css";
 
+cl import from react { useEffect }
+
 sv import from __main__ {
     create_session,
     process_message,
     export_json,
     export_pdf,
-    load_demo
+    load_demo,
+    get_user_by_token,
+    logout
+}
+
+def set_auth_cookie(token: str) -> None {
+    document.cookie = "care_anchor_token=" + token + "; path=/; SameSite=Strict; max-age=604800";
+}
+
+def get_auth_cookie() -> str {
+    name = "care_anchor_token=";
+    parts = document.cookie.split(";");
+    for p in parts {
+        c = p.trim();
+        if c.indexOf(name) == 0 {
+            return c.substring(name.length);
+        }
+    }
+    return "";
+}
+
+def clear_auth_cookie() -> None {
+    document.cookie = "care_anchor_token=; path=/; max-age=0";
 }
 
 import from .ChatWindow { ChatWindow }
@@ -53,6 +77,7 @@ def:pub AppShell() -> JsxElement {
     has loggedIn: bool = false;
     has phoneNumber: str = "";
     has userId: str = "";
+    has authToken: str = "";
     has sessionId: str = "";
     has session: dict = empty_session();
     has draft: str = "";
@@ -84,23 +109,52 @@ def:pub AppShell() -> JsxElement {
         booting = False;
     }
 
-    def handleLogin(user: dict) -> None {
+    def handleLogin(payload: dict) -> None {
+        user = payload["user"];
+        token = payload["token"] if "token" in payload else "";
         phoneNumber = user["phone_number"];
         userId = user["user_id"];
+        authToken = token;
+        if token != "" { set_auth_cookie(token); }
         loggedIn = true;
         bootstrap(user["phone_number"]);
     }
 
-    def handleLogout() -> None {
+    async def handleLogout() -> None {
+        if authToken != "" {
+            try { root spawn logout(token=authToken); } except Exception as e { 0; }
+        }
+        clear_auth_cookie();
         loggedIn = false;
         phoneNumber = "";
         userId = "";
+        authToken = "";
         sessionId = "";
         session = empty_session();
         draft = "";
         errorText = "";
         exportStatus = "";
     }
+
+    async def restoreSession() -> None {
+        token = get_auth_cookie();
+        if token == "" { return; }
+        try {
+            result = root spawn get_user_by_token(token=token);
+            if result.reports.length > 0 {
+                payload = result.reports[0];
+                if "user" in payload {
+                    handleLogin({"user": payload["user"], "token": token});
+                } else {
+                    clear_auth_cookie();
+                }
+            }
+        } except Exception as e {
+            clear_auth_cookie();
+        }
+    }
+
+    useEffect(lambda -> None { restoreSession(); }, []);
 
     async def send_message() -> None {
         if sending or booting or draft.trim() == "" or sessionId == "" { return; }
@@ -211,6 +265,10 @@ def:pub AppShell() -> JsxElement {
                         >
                             Call
                         </button>
+                    </div>
+                    <div className="header-user">
+                        <span className="header-phone">{format_phone(phoneNumber)}</span>
+                        <button className="btn btn--sm header-signout" onClick={lambda -> None { handleLogout(); }}>Sign out</button>
                     </div>
                 </div>
             </header>
