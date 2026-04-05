@@ -46,6 +46,26 @@ def empty_session() -> dict {
     };
 }
 
+def build_pdf_chat_message(payload: dict) -> dict {
+    file_name = payload["file_name"] if "file_name" in payload else "care_anchor_summary.pdf";
+    mime_type = payload["mime_type"] if "mime_type" in payload else "application/pdf";
+    href = "data:" + mime_type + ";base64," + payload["content_base64"];
+    timestamp = payload["generated_at"] if "generated_at" in payload else "";
+
+    return {
+        "role": "assistant",
+        "content": "Your Care Anchor session summary is ready as a PDF attachment.",
+        "timestamp": timestamp,
+        "agent": "Summary Agent",
+        "attachment": {
+            "label": file_name,
+            "href": href,
+            "download_name": file_name,
+            "mime_type": mime_type
+        }
+    };
+}
+
 def:pub AppShell() -> JsxElement {
     has loggedIn: bool = false;
     has phoneNumber: str = "";
@@ -58,12 +78,14 @@ def:pub AppShell() -> JsxElement {
     has exportStatus: str = "";
     has errorText: str = "";
     has activeTab: str = "chat";
+    has localTranscript: list = [];
 
     async def bootstrap(phone: str) -> None {
         booting = True;
         errorText = "";
         exportStatus = "";
         session = empty_session();
+        localTranscript = [];
         sessionId = "";
         draft = "";
         try {
@@ -97,6 +119,7 @@ def:pub AppShell() -> JsxElement {
         draft = "";
         errorText = "";
         exportStatus = "";
+        localTranscript = [];
     }
 
     async def send_message() -> None {
@@ -126,7 +149,20 @@ def:pub AppShell() -> JsxElement {
             result = root spawn export_pdf(session_id=sessionId);
             if result.reports.length > 0 {
                 payload = result.reports[0];
-                exportStatus = "PDF saved: " + payload["file_path"];
+                if "session" in payload {
+                    session = payload["session"];
+                }
+                if "error" in payload {
+                    exportStatus = payload["error"];
+                } elif "content_base64" in payload {
+                    localTranscript = localTranscript.concat([build_pdf_chat_message(payload)]);
+                    exportStatus = "PDF ready in chat.";
+                    activeTab = "chat";
+                } else {
+                    exportStatus = "PDF export failed.";
+                }
+            } else {
+                exportStatus = "PDF export failed.";
             }
         } except Exception as e {
             exportStatus = "PDF export failed.";
@@ -145,6 +181,7 @@ def:pub AppShell() -> JsxElement {
     providers = session["provider_options"] if "provider_options" in session else [];
     summary_text = session["summary_text"] if "summary_text" in session else "";
     session_state = "Preparing session..." if booting else "Session ready";
+    combined_transcript = transcript.concat(localTranscript);
 
     return <div className="dashboard-shell">
         <div className="dashboard-frame">
@@ -186,7 +223,7 @@ def:pub AppShell() -> JsxElement {
                 <section className="dashboard-main__primary">
                     {activeTab == "chat" and
                         <ChatWindow
-                            transcript={transcript}
+                            transcript={combined_transcript}
                             draft={draft}
                             sending={sending or booting}
                             activeAgent={active_agent}
@@ -265,5 +302,6 @@ def:pub AppShell() -> JsxElement {
                 </aside>
             </main>
         </div>
+        <div className="screen-corner-logo" aria-hidden="true"></div>
     </div>;
 }
