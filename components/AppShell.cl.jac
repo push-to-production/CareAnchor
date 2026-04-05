@@ -10,12 +10,19 @@ sv import from __main__ {
     load_demo
 }
 
-import from .AgentTrace { AgentTrace }
 import from .ChatWindow { ChatWindow }
 import from .CrisisBanner { CrisisBanner }
 import from .ExportButtons { ExportButtons }
 import from .LoginScreen { LoginScreen, format_phone }
 import from .SummaryPanel { SummaryPanel }
+
+def tab_class(active_tab: str, tab_name: str) -> str {
+    base = "dashboard-tab";
+    if active_tab == tab_name {
+        return base + " dashboard-tab--active";
+    }
+    return base;
+}
 
 def empty_session() -> dict {
     return {
@@ -53,6 +60,7 @@ def:pub AppShell() -> JsxElement {
     has booting: bool = False;
     has exportStatus: str = "";
     has errorText: str = "";
+    has activeTab: str = "chat";
 
     async def bootstrap(phone: str) -> None {
         booting = True;
@@ -170,46 +178,135 @@ def:pub AppShell() -> JsxElement {
     active_agent = session["active_agent"] if "active_agent" in session else "Conversation Agent";
     intervention_active = session["intervention_active"] if "intervention_active" in session else False;
     risk_flags = session["risk_flags"] if "risk_flags" in session else [];
-    disclaimer = session["disclaimer"] if "disclaimer" in session else "Care Anchor — AI triage and care coordination.";
+    disclaimer = session["disclaimer"] if "disclaimer" in session else "Care Anchor for triage and care coordination.";
+    transcript = session["transcript"] if "transcript" in session else [];
+    trace = session["agent_trace"] if "agent_trace" in session else [];
+    providers = session["provider_options"] if "provider_options" in session else [];
+    summary_text = session["summary_text"] if "summary_text" in session else "";
+    session_state = "Preparing session..." if booting else "Session ready";
 
-    return <div className="app-shell">
-        <header className="hero">
-            <div className="brand">Care Anchor</div>
-            <p className="hero-copy">{disclaimer}</p>
-            <div className="hero-actions">
-                <span className="hero-user">{format_phone(phoneNumber)}</span>
-                <button className="btn btn--secondary btn--sm hero-signout" onClick={lambda -> None { handleLogout(); }}>Sign out</button>
-            </div>
-        </header>
+    return <div className="dashboard-shell">
+        <div className="dashboard-frame">
+            <header className="dashboard-header">
+                <div className="dashboard-header__copy">
+                    <div className="brand-mark">Care Anchor</div>
+                    <h1>HealthAI Dashboard</h1>
+                    <p>{disclaimer}</p>
+                </div>
 
-        <CrisisBanner active={intervention_active} riskFlags={risk_flags} />
+                <div className="dashboard-header__controls">
+                    <div className="session-pill">{session_state}</div>
+                    <div className="dashboard-tabs">
+                        <button
+                            type="button"
+                            className={tab_class(activeTab, "chat")}
+                            onClick={lambda -> None { activeTab = "chat"; }}
+                        >
+                            Chat
+                        </button>
+                        <button
+                            type="button"
+                            className={tab_class(activeTab, "call")}
+                            onClick={lambda -> None { activeTab = "call"; }}
+                        >
+                            Call
+                        </button>
+                    </div>
+                </div>
+            </header>
 
-        {errorText != "" and
-            <div className="error-banner">{errorText}</div>
-        }
+            <CrisisBanner active={intervention_active} riskFlags={risk_flags} />
 
-        <main className="workspace">
-            <div className="workspace__main">
-                <ChatWindow
-                    transcript={session["transcript"] if "transcript" in session else []}
-                    draft={draft}
-                    sending={sending or booting}
-                    activeAgent={active_agent}
-                    onDraftChange={lambda value: str -> None { draft = value; }}
-                    onSend={lambda -> None { send_message(); }}
-                    onDemo={lambda case_id: int -> None { run_demo(case_id); }}
-                    onReset={lambda -> None { bootstrap(phoneNumber); }}
-                />
-            </div>
-            <aside className="workspace__side">
-                <SummaryPanel session={session} />
-                <ExportButtons
-                    sessionId={sessionId}
-                    onJson={lambda -> None { do_export_json(); }}
-                    onPdf={lambda -> None { do_export_pdf(); }}
-                    exportStatus={exportStatus}
-                />
-            </aside>
-        </main>
+            {errorText != "" and
+                <div className="error-banner">{errorText}</div>
+            }
+
+            <main className="dashboard-main">
+                <section className="dashboard-main__primary">
+                    {activeTab == "chat" and
+                        <ChatWindow
+                            transcript={transcript}
+                            draft={draft}
+                            sending={sending or booting}
+                            activeAgent={active_agent}
+                            onDraftChange={lambda value: str -> None { draft = value; }}
+                            onSend={lambda -> None { send_message(); }}
+                            onDemo={lambda case_id: int -> None { run_demo(case_id); }}
+                            onReset={lambda -> None { bootstrap(); }}
+                        />
+                    }
+
+                    {activeTab == "call" and
+                        <div className="call-stage">
+                            <div className="call-stage__badge">Voice workspace</div>
+                            <h2>Ready to start a guided phone consultation?</h2>
+                            <p>
+                                This Jac client now matches the imported dashboard structure.
+                                Voice actions are still backend-driven, so this tab currently acts
+                                as a launch surface for the future call flow.
+                            </p>
+
+                            <div className="call-stage__stats">
+                                <div className="call-stat">
+                                    <span className="call-stat__label">Active agent</span>
+                                    <strong>{active_agent}</strong>
+                                </div>
+                                <div className="call-stat">
+                                    <span className="call-stat__label">Messages captured</span>
+                                    <strong>{String(transcript.length)}</strong>
+                                </div>
+                                <div className="call-stat">
+                                    <span className="call-stat__label">Providers matched</span>
+                                    <strong>{String(providers.length)}</strong>
+                                </div>
+                            </div>
+
+                            <div className="call-stage__notes">
+                                <div className="call-stage__note">
+                                    <h3>What is wired today</h3>
+                                    <p>Chat triage, risk escalation, provider matching, and export workflows remain live.</p>
+                                </div>
+                                <div className="call-stage__note">
+                                    <h3>Suggested next step</h3>
+                                    <p>Use the chat tab to collect patient context, then continue the voice UX from this same dashboard shell.</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </section>
+
+                <aside className="dashboard-main__side">
+                    <div className="panel panel--glass">
+                        <div className="panel__eyebrow">Session overview</div>
+                        <div className="overview-grid">
+                            <div className="overview-stat">
+                                <span>Transcript</span>
+                                <strong>{String(transcript.length)}</strong>
+                            </div>
+                            <div className="overview-stat">
+                                <span>Providers</span>
+                                <strong>{String(providers.length)}</strong>
+                            </div>
+                            <div className="overview-stat">
+                                <span>Risk flags</span>
+                                <strong>{String(risk_flags.length)}</strong>
+                            </div>
+                            <div className="overview-stat">
+                                <span>Summary</span>
+                                <strong>{"Ready" if summary_text != "" else "Pending"}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <SummaryPanel session={session} />
+                    <ExportButtons
+                        sessionId={sessionId}
+                        onJson={lambda -> None { do_export_json(); }}
+                        onPdf={lambda -> None { do_export_pdf(); }}
+                        exportStatus={exportStatus}
+                    />
+                </aside>
+            </main>
+        </div>
     </div>;
 }

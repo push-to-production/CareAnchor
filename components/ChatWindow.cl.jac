@@ -27,7 +27,28 @@ def:pub ChatWindow(
     }
 
     return <div className="chat-window">
+        <div className="chat-window__header">
+            <div>
+                <div className="panel__eyebrow">Live conversation</div>
+                <h2>Care conversation</h2>
+            </div>
+            <div className="chat-window__status">
+                <span className="status-dot"></span>
+                <span>{activeAgent}</span>
+            </div>
+        </div>
+
         <div className="chat-feed">
+            {transcript.length == 0 and
+                <div className="chat-empty-state">
+                    <h3>Start with symptoms, location, and insurance.</h3>
+                    <p>
+                        Care Anchor will route the conversation through the agent pipeline,
+                        identify risk signals, suggest likely codes, and match providers.
+                    </p>
+                </div>
+            }
+
             {[<MessageBubble key={String(i)} msg={msg} /> for (i, msg) in enumerate(transcript)]}
             {sending and
                 <div className="bubble bubble--assistant">
@@ -40,14 +61,16 @@ def:pub ChatWindow(
         </div>
 
         <div className="chat-composer">
-            <textarea
-                placeholder="Describe your symptoms, location, and insurance..."
-                value={draft}
-                onChange={lambda e: any -> None { onDraftChange(e.target.value); }}
-                onKeyDown={lambda e: any -> None { handle_key_down(e); }}
-                disabled={sending}
-                rows={2}
-            />
+            <div className="chat-composer__input">
+                <textarea
+                    placeholder="Type your message..."
+                    value={draft}
+                    onChange={lambda e: any -> None { onDraftChange(e.target.value); }}
+                    onKeyDown={lambda e: any -> None { handle_key_down(e); }}
+                    disabled={sending}
+                    rows={2}
+                />
+            </div>
             <button
                 type="button"
                 className="btn btn--primary"
@@ -59,15 +82,15 @@ def:pub ChatWindow(
         </div>
 
         <div className="demo-bar">
-            <span>Demo cases:</span>
+            <span className="demo-bar__label">Demo cases</span>
             <button type="button" className="btn btn--secondary btn--sm" onClick={lambda -> None { onDemo(1); }} disabled={sending}>
-                Case 1 (Dizziness)
+                Dizziness
             </button>
             <button type="button" className="btn btn--secondary btn--sm" onClick={lambda -> None { onDemo(2); }} disabled={sending}>
-                Case 2 (Nausea)
+                Nausea
             </button>
             <button type="button" className="btn btn--crisis btn--sm" onClick={lambda -> None { onDemo(3); }} disabled={sending}>
-                Case 3 (Crisis)
+                Crisis
             </button>
             <button type="button" className="btn btn--secondary btn--sm" style={{"marginLeft": "auto"}} onClick={onReset} disabled={sending}>
                 New Session

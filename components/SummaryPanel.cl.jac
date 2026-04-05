@@ -10,24 +10,26 @@ def:pub SummaryPanel(session: dict) -> JsxElement {
     location = session["location"] if "location" in session else None;
     insurance = session["insurance"] if "insurance" in session else None;
 
-    return <div className="summary-panel">
+    return <div className="summary-panel panel">
+        <div className="panel__eyebrow">Clinical brief</div>
+
         {(location != None or insurance != None) and
-            <div>
+            <div className="summary-section">
                 <h3>Patient Info</h3>
-                {location != None and <div className="summary-panel__item">📍 {location}</div>}
-                {insurance != None and <div className="summary-panel__item">🏥 {insurance}</div>}
+                {location != None and <div className="summary-panel__item">{location}</div>}
+                {insurance != None and <div className="summary-panel__item">{insurance}</div>}
             </div>
         }
 
         {symptoms.length > 0 and
-            <div>
+            <div className="summary-section">
                 <h3>Reported Symptoms</h3>
                 <div>{[<span key={String(i)} className="code-tag">{sym}</span> for (i, sym) in enumerate(symptoms)]}</div>
             </div>
         }
 
         {codes.length > 0 and
-            <div>
+            <div className="summary-section">
                 <h3>Matched Conditions</h3>
                 {[<div key={c["code"]} style={{"marginBottom": "6px"}}>
                     <span className="code-tag">{c["code"]}</span>
@@ -37,21 +39,21 @@ def:pub SummaryPanel(session: dict) -> JsxElement {
         }
 
         {providers.length > 0 and
-            <div>
+            <div className="summary-section">
                 <h3>Matched Providers</h3>
                 {[<ProviderCard key={p["name"]} provider={p} /> for p in providers]}
             </div>
         }
 
         {summary_text != None and summary_text != "" and
-            <div>
+            <div className="summary-section">
                 <h3>Summary</h3>
                 <div className="summary-panel__item" style={{"fontSize": "0.82rem", "lineHeight": "1.5"}}>{summary_text}</div>
             </div>
         }
 
         {symptoms.length == 0 and codes.length == 0 and providers.length == 0 and
-            <div style={{"color": "#6b7280", "fontSize": "0.82rem"}}>
+            <div className="summary-panel__empty">
                 Describe your symptoms and I'll populate this panel.
             </div>
         }
