@@ -1,7 +1,8 @@
 """
-ICD-10-CM Semantic RAG Engine
+ICD-10-CM search engine.
 
-Replaces BM25 with dense vector retrieval (sentence-transformers).
+Prefers dense vector retrieval when optional ML dependencies are installed,
+and falls back to lexical ranking when they are not.
 
 Data sources
 ------------
@@ -39,8 +40,15 @@ import urllib.request
 from pathlib import Path
 from typing import Optional
 
-import numpy as np
-from sentence_transformers import SentenceTransformer
+try:
+    import numpy as np
+except ModuleNotFoundError:
+    np = None
+
+try:
+    from sentence_transformers import SentenceTransformer
+except ModuleNotFoundError:
+    SentenceTransformer = None
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -57,8 +65,14 @@ _INDEX_CACHE = _DATA_DIR / ".icd_semantic_index.pkl"
 
 _MODEL_NAME = "all-MiniLM-L6-v2"
 _MODEL: Optional[SentenceTransformer] = None
+_SEMANTIC_SEARCH_ENABLED = np is not None and SentenceTransformer is not None
 
 def _get_model() -> SentenceTransformer:
+    if not _SEMANTIC_SEARCH_ENABLED or SentenceTransformer is None:
+        raise RuntimeError(
+            "Semantic ICD search requires optional Python dependencies "
+            "`numpy` and `sentence-transformers`."
+        )
     global _MODEL
     if _MODEL is None:
         _MODEL = SentenceTransformer(_MODEL_NAME)
@@ -381,24 +395,40 @@ def _build_enriched_docs(
 # ---------------------------------------------------------------------------
 
 class _SemanticIndex:
-    __slots__ = ("embeddings", "raw_codes", "icd_codes")
+    __slots__ = ("embeddings", "raw_codes", "icd_codes", "semantic_enabled")
 
     def __init__(
         self,
-        embeddings: np.ndarray,
+        embeddings: np.ndarray | None,
         raw_codes: list[str],
         icd_codes: dict[str, str],
+        semantic_enabled: bool,
     ):
         self.embeddings = embeddings      # float32, shape (N, 384), L2-normalised
         self.raw_codes = raw_codes        # length N, parallel to embeddings
         self.icd_codes = icd_codes        # raw_code → description
+        self.semantic_enabled = semantic_enabled
 
 
 _INDEX: _SemanticIndex | None = None
 
 
+def _build_fallback_index() -> _SemanticIndex:
+    """Load ICD metadata for exact lookups and lexical search only."""
+    icd_codes = _parse_icd_codes()
+    return _SemanticIndex(
+        embeddings=None,
+        raw_codes=list(icd_codes.keys()),
+        icd_codes=icd_codes,
+        semantic_enabled=False,
+    )
+
+
 def _build_index() -> _SemanticIndex:
     """Build and persist the semantic index (one-time, ~60-90 s on CPU)."""
+    if not _SEMANTIC_SEARCH_ENABLED:
+        return _build_fallback_index()
+
     print("Building ICD semantic index — this happens once …")
 
     icd_codes = _parse_icd_codes()
@@ -425,6 +455,7 @@ def _build_index() -> _SemanticIndex:
         embeddings=embeddings.astype(np.float32),
         raw_codes=raw_codes,
         icd_codes=icd_codes,
+        semantic_enabled=True,
     )
 
     with open(_INDEX_CACHE, "wb") as fh:
@@ -436,6 +467,10 @@ def _build_index() -> _SemanticIndex:
 def _get_index() -> _SemanticIndex:
     global _INDEX
     if _INDEX is not None:
+        return _INDEX
+
+    if not _SEMANTIC_SEARCH_ENABLED:
+        _INDEX = _build_fallback_index()
         return _INDEX
 
     if _INDEX_CACHE.exists():
@@ -453,6 +488,53 @@ def _get_index() -> _SemanticIndex:
 # Cosine similarity search
 # ---------------------------------------------------------------------------
 
+_TOKEN_RE = re.compile(r"[a-z0-9]+")
+
+
+def _tokenize(text: str) -> list[str]:
+    return _TOKEN_RE.findall(text.lower())
+
+
+def _lexical_search(
+    query: str,
+    top_k: int,
+    index: _SemanticIndex,
+) -> list[tuple[str, float]]:
+    """Fallback ranking when semantic dependencies are unavailable."""
+    query = query.strip()
+    if not query:
+        return []
+
+    query_text = query.lower()
+    query_tokens = _tokenize(query)
+    if not query_tokens:
+        query_tokens = [query_text]
+    normalized_code = _normalize_code(query.upper())
+
+    scored: list[tuple[str, float]] = []
+    for raw_code, desc in index.icd_codes.items():
+        display_code = _format_code(raw_code).lower()
+        haystack = f"{display_code} {raw_code.lower()} {desc.lower()} {_get_category(raw_code).lower()}"
+
+        code_exact = 1.0 if normalized_code == raw_code else 0.0
+        code_prefix = 1.0 if normalized_code and raw_code.startswith(normalized_code) else 0.0
+        phrase_match = 1.0 if query_text in haystack else 0.0
+        token_hits = sum(1 for token in query_tokens if token in haystack)
+
+        if code_exact == 0.0 and code_prefix == 0.0 and phrase_match == 0.0 and token_hits == 0:
+            continue
+
+        coverage = token_hits / max(len(query_tokens), 1)
+        score = min(
+            0.99,
+            0.15 + (0.45 * coverage) + (0.20 * phrase_match) + (0.20 * code_prefix) + (0.44 * code_exact),
+        )
+        scored.append((raw_code, score))
+
+    scored.sort(key=lambda item: (-item[1], item[0]))
+    return scored[:top_k]
+
+
 def _semantic_search(
     query: str,
     top_k: int,
@@ -462,6 +544,9 @@ def _semantic_search(
     Encode query and return top_k (raw_code, normalised_score) pairs.
     Scores are in [0, 1] (cosine similarity normalised to [0, 1]).
     """
+    if not index.semantic_enabled:
+        return _lexical_search(query, top_k, index)
+
     model = _get_model()
     query_vec = model.encode(
         [query],
@@ -512,7 +597,7 @@ def _resolve_code(code: str, icd_codes: dict[str, str]) -> tuple[str, str] | Non
 
 def search_icd_jac(query: str, top_k: int = 10) -> list[list[str]]:
     """
-    Semantic search over enriched ICD-10-CM documents.
+    Search over ICD-10-CM documents.
 
     Returns a list of [display_code, description, category, confidence_str]
     sorted by relevance descending.  Confidence is in (0, 1].
@@ -520,9 +605,8 @@ def search_icd_jac(query: str, top_k: int = 10) -> list[list[str]]:
     index = _get_index()
     ranked = _semantic_search(query, top_k, index)
 
-    # Cosine similarity scores are already in [0, 1] after normalisation.
-    # Use absolute values; drop anything below 0.55 (poor semantic match).
-    _MIN_CONFIDENCE = 0.55
+    # Semantic scores are stricter than lexical fallback scores.
+    _MIN_CONFIDENCE = 0.55 if index.semantic_enabled else 0.25
 
     result: list[list[str]] = []
     for raw_code, score in ranked:
