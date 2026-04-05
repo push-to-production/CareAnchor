@@ -413,7 +413,10 @@ def:pub AppShell() -> JsxElement {
     if showSessions {
         return <div className="session-chooser">
             <header className="session-chooser__header">
-                <div className="brand-mark">ANCHORCARE</div>
+                <div className="session-chooser__header-left">
+                    <button className="btn btn--sm btn--ghost" onClick={lambda -> None { showSessions = false; }}>← Back</button>
+                    <div className="brand-mark">ANCHORCARE</div>
+                </div>
                 <div className="header-user">
                     <span className="header-phone">{format_phone(phoneNumber)}</span>
                     <button className="btn btn--sm header-signout" onClick={lambda -> None { handleLogout(); }}>Sign out</button>

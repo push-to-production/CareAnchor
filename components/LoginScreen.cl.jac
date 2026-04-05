@@ -66,8 +66,8 @@ def:pub LoginScreen(props: dict) -> JsxElement {
             <section className="login-hero">
                 <div className="login-corner-logo" aria-hidden="true"></div>
                 <div className="login-hero__copy">
-                    <div className="login-kicker">AnchorCare access</div>
-                    <h1 className="login-title">Enter the care coordination workspace.</h1>
+                    <div className="login-kicker">AnchorCare Dashboard</div>
+                    <h1 className="login-title">Jac-powered care coordination, triage, and follow-through.</h1>
                     <p className="login-tagline">
                         Sign in or create an account to open the AnchorCare dashboard for guided intake,
                         provider matching, crisis escalation, and export-ready summaries.
@@ -84,7 +84,7 @@ def:pub LoginScreen(props: dict) -> JsxElement {
                         <strong>Location and insurance-aware routing</strong>
                     </div>
                     <div className="login-highlight">
-                        <span className="login-highlight__label">Clinical exports</span>
+                        <span className="login-highlight__label">PDF handoff artifacts</span>
                         <strong>PDF and JSON handoff artifacts</strong>
                     </div>
                 </div>

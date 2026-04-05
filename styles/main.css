@@ -1184,84 +1184,152 @@ textarea {
   gap: 26px;
 }
 
-.marketing-hero__copy {
+/* ── Session chooser screen ─────────────────────────────── */
+.session-chooser {
+  min-height: 100vh;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  padding: 10px 0;
+  animation: fade-up 420ms ease;
 }
 
-.marketing-hero__title {
-  max-width: 12ch;
-  font-size: clamp(3rem, 5vw, 5.4rem);
-  line-height: 0.94;
-  letter-spacing: -0.06em;
-}
-
-.marketing-hero__text {
-  max-width: 40rem;
-  color: var(--muted);
-  font-size: 1.04rem;
-  line-height: 1.78;
-}
-
-.marketing-hero__actions {
+.session-chooser__header {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.session-chooser__header-left {
+  display: flex;
+  align-items: center;
   gap: 12px;
-  padding-top: 4px;
 }
 
-.marketing-hero__primary,
-.marketing-hero__secondary {
-  min-width: 170px;
-  border-radius: 999px;
+.btn--ghost {
+  background: transparent;
+  border: 1px solid var(--border, rgba(0,0,0,0.12));
+  color: var(--text-muted, #64748b);
+}
+.btn--ghost:hover {
+  background: var(--surface-soft);
+  color: var(--text-primary, #1e293b);
 }
 
-.marketing-hero__note {
-  max-width: 34rem;
-  color: var(--muted-soft);
-  font-size: 0.82rem;
-  line-height: 1.6;
+.session-chooser__body {
+  flex: 1;
+  max-width: 820px;
+  width: 100%;
+  margin: 0 auto;
 }
 
-.marketing-metrics {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 8px;
+/* ── Session list ────────────────────────────────────────── */
+.session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--surface-strong);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: 28px;
 }
 
-.marketing-metric {
+.session-list--empty {
+  align-items: center;
+  padding: 64px 28px;
+  gap: 20px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.session-list__empty-text {
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.session-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.session-list__title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+.session-list__items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.session-item {
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 16px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(91, 133, 173, 0.14);
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.session-item:hover {
+  border-color: rgba(31, 111, 214, 0.38);
   box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.95);
 }
 
-.marketing-metric strong {
-  font-size: 1.2rem;
-  line-height: 1;
-  letter-spacing: -0.04em;
+.session-item--active {
+  border-color: rgba(31, 111, 214, 0.48);
+  background: rgba(31, 111, 214, 0.04);
 }
 
-.marketing-metric span {
-  color: var(--muted);
-  font-size: 0.8rem;
+.session-item--crisis {
+  border-color: rgba(200, 74, 80, 0.38);
+  background: rgba(200, 74, 80, 0.04);
+}
+
+.session-item__preview {
+  font-size: 0.95rem;
+  color: var(--text);
+  font-weight: 600;
   line-height: 1.45;
 }
 
-.marketing-preview__frame {
+.session-item__meta {
   display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding: 22px;
-  border-radius: 30px;
-  animation: fade-up 420ms ease;
+  gap: 14px;
+  font-size: 0.78rem;
+  color: var(--muted-soft);
+}
+
+.session-item__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.session-item__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(31, 111, 214, 0.08);
+  border: 1px solid rgba(31, 111, 214, 0.14);
+  color: var(--blue-deep);
+  font-size: 0.74rem;
+  font-weight: 700;
 }
 
 .marketing-preview__header {

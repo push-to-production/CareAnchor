@@ -38,16 +38,16 @@ import re
 import ssl
 import urllib.request
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 try:
     import numpy as np
-except ModuleNotFoundError:
+except ImportError:
     np = None
 
 try:
     from sentence_transformers import SentenceTransformer
-except ModuleNotFoundError:
+except ImportError:
     SentenceTransformer = None
 
 # ---------------------------------------------------------------------------
@@ -65,7 +65,7 @@ _INDEX_CACHE = _DATA_DIR / ".icd_semantic_index.pkl"
 
 _MODEL_NAME = "all-MiniLM-L6-v2"
 _MODEL: Optional[SentenceTransformer] = None
-_SEMANTIC_SEARCH_ENABLED = np is not None and SentenceTransformer is not None
+_HAS_SEMANTIC_DEPS = np is not None and SentenceTransformer is not None
 
 def _get_model() -> SentenceTransformer:
     if not _SEMANTIC_SEARCH_ENABLED or SentenceTransformer is None:
@@ -74,6 +74,11 @@ def _get_model() -> SentenceTransformer:
             "`numpy` and `sentence-transformers`."
         )
     global _MODEL
+    if not _HAS_SEMANTIC_DEPS:
+        raise RuntimeError(
+            "Semantic ICD retrieval dependencies are unavailable. "
+            "Install numpy and sentence-transformers to enable dense retrieval."
+        )
     if _MODEL is None:
         _MODEL = SentenceTransformer(_MODEL_NAME)
     return _MODEL
@@ -395,19 +400,21 @@ def _build_enriched_docs(
 # ---------------------------------------------------------------------------
 
 class _SemanticIndex:
-    __slots__ = ("embeddings", "raw_codes", "icd_codes", "semantic_enabled")
+    __slots__ = ("embeddings", "raw_codes", "icd_codes", "documents", "mode")
 
     def __init__(
         self,
-        embeddings: np.ndarray | None,
+        embeddings: Any,
         raw_codes: list[str],
         icd_codes: dict[str, str],
-        semantic_enabled: bool,
+        documents: list[str],
+        mode: str,
     ):
         self.embeddings = embeddings      # float32, shape (N, 384), L2-normalised
         self.raw_codes = raw_codes        # length N, parallel to embeddings
         self.icd_codes = icd_codes        # raw_code → description
-        self.semantic_enabled = semantic_enabled
+        self.documents = documents
+        self.mode = mode
 
 
 _INDEX: _SemanticIndex | None = None
@@ -425,42 +432,56 @@ def _build_fallback_index() -> _SemanticIndex:
 
 
 def _build_index() -> _SemanticIndex:
-    """Build and persist the semantic index (one-time, ~60-90 s on CPU)."""
-    if not _SEMANTIC_SEARCH_ENABLED:
-        return _build_fallback_index()
-
-    print("Building ICD semantic index — this happens once …")
-
+    """Build and persist the semantic index, or a lexical fallback."""
     icd_codes = _parse_icd_codes()
-    print(f"  Loaded {len(icd_codes):,} ICD-10-CM codes.")
+    if _HAS_SEMANTIC_DEPS:
+        print("Building ICD semantic index — this happens once …")
+        print(f"  Loaded {len(icd_codes):,} ICD-10-CM codes.")
 
-    symptom_rows = _download_symptom_dataset()
-    print(f"  Loaded {len(symptom_rows)} disease-symptom rows.")
+        symptom_rows: list[dict[str, str]] = []
+        try:
+            symptom_rows = _download_symptom_dataset()
+        except Exception as exc:
+            print(f"  Symptom dataset unavailable, continuing without enrichment: {exc}")
+        if symptom_rows:
+            print(f"  Loaded {len(symptom_rows)} disease-symptom rows.")
 
-    documents, raw_codes = _build_enriched_docs(icd_codes, symptom_rows)
-    enriched_count = sum(1 for d in documents if "symptoms include" in d)
-    print(f"  Built {len(documents):,} enriched documents ({enriched_count} with symptom data).")
+        documents, raw_codes = _build_enriched_docs(icd_codes, symptom_rows)
+        enriched_count = sum(1 for d in documents if "symptoms include" in d)
+        print(f"  Built {len(documents):,} enriched documents ({enriched_count} with symptom data).")
 
-    model = _get_model()
-    print(f"  Encoding with {_MODEL_NAME} …")
-    embeddings = model.encode(
-        documents,
-        batch_size=512,
-        show_progress_bar=True,
-        convert_to_numpy=True,
-        normalize_embeddings=True,   # L2-norm → cosine sim = dot product
-    )
+        model = _get_model()
+        print(f"  Encoding with {_MODEL_NAME} …")
+        embeddings = model.encode(
+            documents,
+            batch_size=512,
+            show_progress_bar=True,
+            convert_to_numpy=True,
+            normalize_embeddings=True,
+        )
 
-    index = _SemanticIndex(
-        embeddings=embeddings.astype(np.float32),
-        raw_codes=raw_codes,
-        icd_codes=icd_codes,
-        semantic_enabled=True,
-    )
+        index = _SemanticIndex(
+            embeddings=embeddings.astype(np.float32),
+            raw_codes=raw_codes,
+            icd_codes=icd_codes,
+            documents=documents,
+            mode="semantic",
+        )
+    else:
+        print("Building ICD lexical fallback index — semantic dependencies not installed.")
+        documents = [f"{_format_code(raw_code)}: {desc}" for raw_code, desc in icd_codes.items()]
+        raw_codes = list(icd_codes.keys())
+        index = _SemanticIndex(
+            embeddings=None,
+            raw_codes=raw_codes,
+            icd_codes=icd_codes,
+            documents=documents,
+            mode="lexical",
+        )
 
     with open(_INDEX_CACHE, "wb") as fh:
         pickle.dump(index, fh, protocol=pickle.HIGHEST_PROTOCOL)
-    print("  Semantic index saved.")
+    print(f"  ICD {index.mode} index saved.")
     return index
 
 
@@ -477,6 +498,8 @@ def _get_index() -> _SemanticIndex:
         try:
             with open(_INDEX_CACHE, "rb") as fh:
                 _INDEX = pickle.load(fh)
+            if _HAS_SEMANTIC_DEPS and getattr(_INDEX, "mode", "semantic") != "semantic":
+                _INDEX = _build_index()
             return _INDEX
         except Exception:
             pass  # corrupt cache — rebuild
@@ -544,38 +567,46 @@ def _semantic_search(
     Encode query and return top_k (raw_code, normalised_score) pairs.
     Scores are in [0, 1] (cosine similarity normalised to [0, 1]).
     """
-    if not index.semantic_enabled:
-        return _lexical_search(query, top_k, index)
+    if index.mode == "semantic":
+        model = _get_model()
+        query_vec = model.encode(
+            [query],
+            convert_to_numpy=True,
+            normalize_embeddings=True,
+        )[0].astype(np.float32)
 
-    model = _get_model()
-    query_vec = model.encode(
-        [query],
-        convert_to_numpy=True,
-        normalize_embeddings=True,
-    )[0].astype(np.float32)                        # shape (384,)
+        sims = index.embeddings @ query_vec
 
-    sims = index.embeddings @ query_vec            # shape (N,), values in [-1, 1]
+        if top_k >= len(sims):
+            top_idx = np.argsort(sims)[::-1]
+        else:
+            part = np.argpartition(sims, -top_k)[-top_k:]
+            top_idx = part[np.argsort(sims[part])[::-1]]
 
-    # Get indices of top-k highest scores
-    if top_k >= len(sims):
-        top_idx = np.argsort(sims)[::-1]
-    else:
-        # argpartition is O(N) then sort only top_k
-        part = np.argpartition(sims, -top_k)[-top_k:]
-        top_idx = part[np.argsort(sims[part])[::-1]]
+        results: list[tuple[str, float]] = []
+        seen_codes: set[str] = set()
+        for idx in top_idx:
+            code = index.raw_codes[idx]
+            if code in seen_codes:
+                continue
+            seen_codes.add(code)
+            score = float((sims[idx] + 1.0) / 2.0)
+            results.append((code, score))
+        return results
 
-    results: list[tuple[str, float]] = []
-    seen_codes: set[str] = set()
-    for idx in top_idx:
-        code = index.raw_codes[idx]
-        if code in seen_codes:
-            continue
-        seen_codes.add(code)
-        # Normalise cosine sim from [-1,1] to [0,1]
-        score = float((sims[idx] + 1.0) / 2.0)
-        results.append((code, score))
+    query_tokens = set(re.findall(r"[a-z0-9]+", query.lower()))
+    scored: list[tuple[str, float]] = []
+    for raw_code, doc in zip(index.raw_codes, index.documents):
+        lowered = doc.lower()
+        doc_tokens = set(re.findall(r"[a-z0-9]+", lowered))
+        overlap = len(query_tokens & doc_tokens)
+        substring_bonus = 2 if query.lower() in lowered else 0
+        score = overlap + substring_bonus
+        if score > 0:
+            scored.append((raw_code, min(0.95, 0.55 + (0.05 * score))))
 
-    return results
+    scored.sort(key=lambda item: item[1], reverse=True)
+    return scored[:top_k]
 
 # ---------------------------------------------------------------------------
 # Code resolution helpers
