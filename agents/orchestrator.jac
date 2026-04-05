@@ -5,7 +5,7 @@ import from models.session {
 }
 import from services.common { new_session_id, iso_now }
 import from .conversation { minimum_fields_ready, run_conversation_agent }
-import from .intervention { run_intervention_agent, try_resume_from_intervention }
+import from .intervention { run_intervention_agent, try_resume_from_intervention, run_therapist_search }
 import from .calling { run_calling_agent, build_calling_follow_up }
 import from .diagnosis { run_diagnosis_agent }
 import from .messaging { run_messaging_agent }
@@ -47,7 +47,13 @@ def run_pipeline(session: UserSession, message: str) -> dict {
     }
 
     if session.intervention_active {
-        hold = "**Safety check** — Are you safe right now? If in immediate danger call **911** or text **988**.";
+        run_conversation_agent(session, message);
+        if not session.crisis_therapists_shown and session.location and session.location != "" {
+            reply = run_therapist_search(session);
+            append_message(session, "assistant", reply, "Intervention Agent", iso_now());
+            return build_payload(session, reply, True);
+        }
+        hold = "**Safety check** — Are you safe right now? If in immediate danger call **911** or text **988**.\n\nCould you share your city and state so I can find a therapist near you?";
         append_message(session, "assistant", hold, "Intervention Agent", iso_now());
         return build_payload(session, hold, True);
     }
