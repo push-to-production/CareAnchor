@@ -44,4 +44,4 @@ port = 8000
 port = 5173
 
 [plugins.byllm.model]
-default_model = "gemma2:2b"
+default_model = "ollama/gemma2:2b"

@@ -77,7 +77,7 @@ walker :pub create_session {
         session = created[0];
         session.active_agent = "Conversation Agent";
         session.agent_path = ["Conversation Agent:active"];
-        welcome = "Hi, I'm Care Anchor. Tell me your symptoms and share your city/state so I can find providers near you.";
+        welcome = "Hi, I'm AnchorCare. Tell me your symptoms and share your city/state so I can find providers near you.";
         append_message(session, "assistant", welcome, "Conversation Agent", now);
         session.agent_path.append("Conversation Agent:completed");
         commit();

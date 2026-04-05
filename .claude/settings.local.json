@@ -60,7 +60,8 @@
       "Bash(curl -s \"https://clinicaltables.nlm.nih.gov/api/npi_idv/v3/search?terms=Neurology&sf=provider_type,addr_practice.city&q=addr_practice.state:WA+AND+addr_practice.city:SEATTLE&df=NPI,name.full,provider_type,addr_practice.full&ef=name.credential,addr_practice.phone,addr_practice.city&maxList=3\")",
       "Bash(curl -s \"https://clinicaltables.nlm.nih.gov/api/npi_idv/v3/search?terms=Family+Medicine&sf=provider_type,addr_practice.city&q=addr_practice.state:IL+AND+addr_practice.city:CHICAGO&df=NPI,name.full,provider_type,addr_practice.full&ef=name.credential,addr_practice.phone,addr_practice.city&maxList=3\")",
       "mcp__chrome-devtools__list_network_requests",
-      "mcp__chrome-devtools__get_network_request"
+      "mcp__chrome-devtools__get_network_request",
+      "mcp__chrome-devtools__new_page"
     ]
   },
   "enabledMcpjsonServers": [

@@ -6,51 +6,52 @@ cl import from "react-pdf-html" { default as Html }
 def pdf_styles() -> dict {
     return {
         "page": {
-            "paddingTop": 34,
-            "paddingBottom": 46,
-            "paddingHorizontal": 34,
+            "paddingTop": 40,
+            "paddingBottom": 54,
+            "paddingHorizontal": 44,
             "backgroundColor": "#ffffff",
-            "color": "#163247"
+            "color": "#1a2e40"
         },
         "header": {
-            "marginBottom": 18,
-            "paddingBottom": 12,
-            "borderBottomWidth": 1,
-            "borderBottomColor": "#d7e6f2"
+            "marginBottom": 20,
+            "paddingBottom": 14,
+            "borderBottomWidth": 1.5,
+            "borderBottomColor": "#174f96"
         },
         "kicker": {
-            "fontSize": 10,
+            "fontSize": 8,
             "fontWeight": 800,
-            "letterSpacing": 1.4,
+            "letterSpacing": 2,
             "color": "#174f96",
             "marginBottom": 6
         },
         "title": {
-            "fontSize": 20,
+            "fontSize": 18,
             "fontWeight": 800,
-            "marginBottom": 6
+            "color": "#1a2e40",
+            "marginBottom": 4
         },
         "meta": {
-            "fontSize": 10,
-            "color": "#5e7184",
+            "fontSize": 9,
+            "color": "#70869a",
             "marginBottom": 2
         },
         "html": {
             "fontSize": 10,
-            "lineHeight": 1.5,
-            "color": "#163247"
+            "lineHeight": 1.6,
+            "color": "#1a2e40"
         },
         "footer": {
             "position": "absolute",
-            "left": 34,
-            "right": 34,
-            "bottom": 18,
+            "left": 44,
+            "right": 44,
+            "bottom": 20,
             "paddingTop": 8,
             "borderTopWidth": 1,
             "borderTopColor": "#d7e6f2"
         },
         "footerText": {
-            "fontSize": 9,
+            "fontSize": 8,
             "color": "#70869a"
         }
     };
