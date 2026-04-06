@@ -49,22 +49,6 @@ obj DiagnosisResult {
     has provider_query_terms: list[str] = [];
 }
 
-obj RankedProvider {
-    has provider: ProviderOption;
-    has score: float = 0.0;
-    has reasons: list[str] = [];
-}
-
-obj ReferralHandoffPacket {
-    has handoff_title: str = "Referral Handoff";
-    has referral_reason: str = "";
-    has clinical_summary: str = "";
-    has patient_snapshot: dict = {};
-    has ranked_providers: list = [];
-    has next_steps: list[str] = [];
-    has export_metadata: dict = {};
-}
-
 obj CallingPreparation {
     has normalized_location: str;
     has normalized_insurance: str;
@@ -85,8 +69,6 @@ node UserSession {
     has risk_flags: list[str] = [];
     has assigned_codes: list = [];
     has provider_options: list = [];
-    has ranked_provider_options: list = [];
-    has referral_handoff: dict = {};
     has agent_path: list[str] = [];
     has intervention_active: bool = False;
     has intervention_resolved: bool = False;
@@ -142,30 +124,6 @@ def _to_dict_provider(p: any) -> dict {
     };
 }
 
-def _to_dict_ranked_provider(r: any) -> dict {
-    provider = r["provider"] if isinstance(r, dict) else r.provider;
-    reasons = r["reasons"] if isinstance(r, dict) else r.reasons;
-    score = r["score"] if isinstance(r, dict) else r.score;
-    return {
-        "provider": _to_dict_provider(provider),
-        "score": score,
-        "reasons": reasons
-    };
-}
-
-def _to_dict_referral_handoff(handoff: any) -> dict {
-    if isinstance(handoff, dict) { return handoff; }
-    return {
-        "handoff_title": handoff.handoff_title,
-        "referral_reason": handoff.referral_reason,
-        "clinical_summary": handoff.clinical_summary,
-        "patient_snapshot": handoff.patient_snapshot,
-        "ranked_providers": handoff.ranked_providers,
-        "next_steps": handoff.next_steps,
-        "export_metadata": handoff.export_metadata
-    };
-}
-
 def session_to_dict(session: UserSession) -> dict {
     disclaimer = APP_DISCLAIMER;
     agent_trace: list = [
@@ -173,10 +131,8 @@ def session_to_dict(session: UserSession) -> dict {
         {"name": "Conversation Agent", "status": "idle"},
         {"name": "Calling Agent", "status": "idle"},
         {"name": "Diagnosis Agent", "status": "idle"},
-        {"name": "Provider Ranking Agent", "status": "idle"},
         {"name": "Messaging Agent", "status": "idle"},
-        {"name": "Summary Agent", "status": "idle"},
-        {"name": "Referral Handoff Agent", "status": "idle"}
+        {"name": "Summary Agent", "status": "idle"}
     ];
     for step in session.agent_path {
         parts = step.split(":");
@@ -193,7 +149,6 @@ def session_to_dict(session: UserSession) -> dict {
     transcript_list: list = [_to_dict_msg(m) for m in session.transcript];
     codes_list: list = [_to_dict_code(c) for c in session.assigned_codes];
     providers_list: list = [_to_dict_provider(p) for p in session.provider_options];
-    ranked_provider_list: list = [_to_dict_ranked_provider(p) for p in session.ranked_provider_options];
     return {
         "session_id": session.session_id,
         "phone_number": session.phone_number,
@@ -205,8 +160,6 @@ def session_to_dict(session: UserSession) -> dict {
         "risk_flags": session.risk_flags,
         "assigned_codes": codes_list,
         "provider_options": providers_list,
-        "ranked_provider_options": ranked_provider_list,
-        "referral_handoff": _to_dict_referral_handoff(session.referral_handoff),
         "agent_path": session.agent_path,
         "agent_trace": agent_trace,
         "intervention_active": session.intervention_active,
