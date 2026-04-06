@@ -1,9 +1,9 @@
 """
 ICD-10-CM code search for Care Anchor.
 
-Backed by ICD search over all 74 719 codes from the CMS April 2026
-release. When optional ML dependencies are installed it uses semantic
-ranking; otherwise it falls back to lexical ranking.
+Backed by a BM25 inverted index over all 74 719 codes from the CMS
+April 2026 release.  The index is built once and cached on disk so
+subsequent imports are near-instant (~30 ms).
 
 Public surface
 --------------
@@ -22,16 +22,15 @@ import from data.icd_rag {
     warm_up
 }
 
-# Pre-warm the ICD index at module load. This uses the semantic cache when
-# optional ML dependencies are installed, and a lightweight lexical index
-# otherwise.
+# Pre-warm the BM25 index at module load (builds cache on first run,
+# ~280 ms; subsequent loads from pickle ~30 ms).
 glob _icd_ready: int = warm_up();
 
 # ---------------------------------------------------------------------------
 # Public helpers
 # ---------------------------------------------------------------------------
 
-"""Full-text ICD search over all 74 K ICD-10-CM codes.
+"""Full-text RAG search over all 74 K ICD-10-CM codes using BM25 ranking.
 Returns up to top_k results ordered by relevance with confidence in [0,1]."""
 def search_icd_by_text(query: str, top_k: int = 10) -> list[DiagnosisCode] {
     raw: list[list[str]] = search_icd_jac(query, top_k);
@@ -42,7 +41,7 @@ def search_icd_by_text(query: str, top_k: int = 10) -> list[DiagnosisCode] {
             description=item[1],
             category=item[2],
             confidence=float(item[3]),
-            source="icd_search"
+            source="rag_bm25"
         ));
     }
     return results;

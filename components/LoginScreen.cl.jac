@@ -1,4 +1,4 @@
-"""Standalone login page for AnchorCare."""
+"""Phone number + password login / sign-up screen."""
 
 sv import from __main__ { register_or_login }
 
@@ -66,10 +66,10 @@ def:pub LoginScreen(props: dict) -> JsxElement {
             <section className="login-hero">
                 <div className="login-corner-logo" aria-hidden="true"></div>
                 <div className="login-hero__copy">
-                    <div className="login-kicker">AnchorCare access</div>
-                    <h1 className="login-title">Enter the care coordination workspace.</h1>
+                    <div className="login-kicker">AnchorCare Dashboard</div>
+                    <h1 className="login-title">Jac-powered care coordination, triage, and follow-through.</h1>
                     <p className="login-tagline">
-                        Sign in or create an account to open the AnchorCare dashboard for guided intake,
+                        Sign in to continue with the same dashboard workspace used for guided chat,
                         provider matching, crisis escalation, and export-ready summaries.
                     </p>
                 </div>
@@ -84,13 +84,9 @@ def:pub LoginScreen(props: dict) -> JsxElement {
                         <strong>Location and insurance-aware routing</strong>
                     </div>
                     <div className="login-highlight">
-                        <span className="login-highlight__label">Clinical exports</span>
+                        <span className="login-highlight__label">PDF handoff artifacts</span>
                         <strong>PDF and JSON handoff artifacts</strong>
                     </div>
-                </div>
-
-                <div className="login-hero__actions">
-                    <button type="button" className="btn btn--secondary login-hero__back" onClick={lambda -> None { props["onGoHome"](); }}>Back to landing page</button>
                 </div>
             </section>
 
@@ -132,7 +128,6 @@ def:pub LoginScreen(props: dict) -> JsxElement {
                 </div>
 
                 <button
-                    type="button"
                     className="btn btn--primary login-btn"
                     onClick={lambda -> None { handleSubmit(); }}
                     disabled={loading}
