@@ -2,7 +2,7 @@
 
 import from models.session { UserSession, CallingPreparation }
 import from services.common { transcript_excerpt }
-glob LLM_READY: bool = True;
+glob LLM_READY: bool = False;
 
 """You are Care Anchor, a compassionate medical intake assistant. Your job is to gather enough
 information to find the right healthcare providers near the patient. You MUST collect:
@@ -77,8 +77,24 @@ def build_calling_follow_up(session: UserSession, prep: CallingPreparation) -> s
                 0;
             }
         }
-        missing_str = " and ".join(prep.missing_fields);
-        return "Could you share your " + missing_str + "? Also tell me more about your symptoms — where exactly do you feel them, how long have they been going on, and how severe are they?";
+        prompts: list[str] = [];
+        has_duration = session.symptom_duration is not None and session.symptom_duration != "";
+        has_severity = session.severity is not None and session.severity != "";
+        has_insurance = session.insurance is not None and session.insurance != "";
+
+        if "location (city and state)" in prep.missing_fields {
+            prompts.append("What city and state are you in so I can look for providers near you?");
+        }
+        if "symptoms" in prep.missing_fields {
+            prompts.append("Please tell me what symptoms you're having.");
+        } elif not has_duration or not has_severity {
+            prompts.append("How long has this been going on, and how severe is it right now?");
+        }
+        if not has_insurance {
+            prompts.append("If you know it, what insurance do you have?");
+        }
+
+        return "Thanks for the update. " + " ".join(prompts);
     }
     return "I have everything I need. Let me look up providers for you.";
 }

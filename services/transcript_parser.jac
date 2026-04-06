@@ -17,6 +17,24 @@ glob INSURANCE_ALIASES: dict[str, list[str]] = {
     "Medicaid": ["medicaid"]
 };
 
+def _title_case_words(text: str) -> str {
+    parts = text.strip().split();
+    titled: list[str] = [];
+    for part in parts {
+        clean = part.strip();
+        if clean == "" { continue; }
+        titled.append(clean[0].upper() + clean[1:].lower());
+    }
+    return " ".join(titled);
+}
+
+def _normalize_state_token(token: str) -> str {
+    clean = token.strip();
+    if clean == "" { return ""; }
+    if len(clean) == 2 { return clean.upper(); }
+    return _title_case_words(clean);
+}
+
 def rule_extract_insurance(text: str) -> str {
     lower = text.lower();
     for canonical in INSURANCE_ALIASES {
@@ -29,14 +47,29 @@ def rule_extract_insurance(text: str) -> str {
 }
 
 def rule_extract_location(text: str) -> str {
-    # Extract "City, ST" or "City, State" patterns (e.g. "San Francisco, CA" or "Portland, Maine").
-    # One to three Title-Case words followed by a state abbreviation or full state name.
-    matches = re.findall(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2}),\s*([A-Z]{2})\b', text);
+    # Accept common free-form variants like "denver, co" or "Portland, Maine".
+    matches = re.findall(
+        r'\b([A-Za-z]+(?:\s+[A-Za-z]+){0,2}),\s*([A-Za-z]{2})\b',
+        text,
+        flags=re.IGNORECASE
+    );
     if not matches {
-        matches = re.findall(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2}),\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b', text);
+        matches = re.findall(
+            r'\b([A-Za-z]+(?:\s+[A-Za-z]+){0,2}),\s*([A-Za-z]+(?:\s+[A-Za-z]+)*)\b',
+            text,
+            flags=re.IGNORECASE
+        );
     }
     if matches {
-        locations = [m[0].strip() + ", " + m[1] for m in matches];
+        locations: list[str] = [];
+        for m in matches {
+            city = _title_case_words(m[0]);
+            state = _normalize_state_token(m[1]);
+            loc = city + ", " + state;
+            if loc not in locations {
+                locations.append(loc);
+            }
+        }
         return " or ".join(locations);
     }
     return "";
@@ -96,6 +129,7 @@ def build_conversation_state_update(
     loc_str = known_location if known_location else "";
 
     rule_loc = rule_extract_location(message);
+    rule_ins = rule_extract_insurance(message);
     rule_dur = rule_extract_duration(message);
     rule_sev = rule_extract_severity(message);
     rule_codes = extract_symptom_keywords(message);
@@ -129,7 +163,7 @@ def build_conversation_state_update(
                 follow_up_question=llm_result.follow_up_question,
                 enough_for_diagnosis=ready,
                 location=final_loc if final_loc != "" else None,
-                insurance=None,
+                insurance=llm_result.insurance if llm_result.insurance else rule_ins if rule_ins else None,
                 duration=llm_result.duration if llm_result.duration else rule_dur if rule_dur else None,
                 severity=llm_result.severity if llm_result.severity else rule_sev if rule_sev else None
             );
@@ -151,7 +185,7 @@ def build_conversation_state_update(
         follow_up_question=follow_up,
         enough_for_diagnosis=ready,
         location=merged_loc if merged_loc != "" else None,
-        insurance=None,
+        insurance=rule_ins if rule_ins != "" else None,
         duration=rule_dur if rule_dur != "" else None,
         severity=rule_sev if rule_sev != "" else None
     );
