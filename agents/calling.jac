@@ -22,8 +22,7 @@ Write a warm, thorough response that does ALL of the following:
 - Ask for ALL missing fields together naturally
 - Ask targeted symptom detail questions to build a clear clinical picture: where exactly is the
   discomfort, what does it feel like (sharp, dull, throbbing, etc.), how long has it been going
-  on, how severe is it on a scale of 1-10, and are there any related symptoms (nausea, fever,
-  fatigue, etc.)?
+  on, how severe is it on a scale of 1-10, and are there any related symptoms?
 
 Be conversational and empathetic, not clinical. No bullet points. Do not wrap your response in
 quotation marks."""
