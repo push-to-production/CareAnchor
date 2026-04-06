@@ -15,16 +15,28 @@ def:pub SessionList(props: dict) -> JsxElement {
     on_new = props["onNew"];
 
     if sessions.length == 0 {
-        return <div className="session-list session-list--empty">
-            <p className="session-list__empty-text">No previous sessions.</p>
-            <button className="btn btn--primary btn--sm" onClick={lambda -> None { on_new(); }}>New session</button>
-        </div>;
+        return <section className="session-list panel">
+            <div className="session-list__header">
+                <div className="session-list__heading">
+                    <div className="panel__eyebrow">Conversation history</div>
+                    <h2 className="session-list__title">Recent sessions</h2>
+                </div>
+                <button className="btn btn--primary btn--sm session-list__new-btn" onClick={lambda -> None { on_new(); }}>+ New</button>
+            </div>
+            <div className="session-list__empty">
+                <p className="session-list__empty-text">No previous sessions yet. Start a new conversation to begin tracking care coordination.</p>
+                <button className="btn btn--primary session-list__empty-btn" onClick={lambda -> None { on_new(); }}>Start new session</button>
+            </div>
+        </section>;
     }
 
-    return <div className="session-list">
+    return <section className="session-list panel">
         <div className="session-list__header">
-            <span className="session-list__title">Sessions</span>
-            <button className="btn btn--primary btn--sm" onClick={lambda -> None { on_new(); }}>+ New</button>
+            <div className="session-list__heading">
+                <div className="panel__eyebrow">Conversation history</div>
+                <h2 className="session-list__title">Recent sessions</h2>
+            </div>
+            <button className="btn btn--primary btn--sm session-list__new-btn" onClick={lambda -> None { on_new(); }}>+ New</button>
         </div>
         <ul className="session-list__items">
             {[<li
@@ -44,5 +56,5 @@ def:pub SessionList(props: dict) -> JsxElement {
                 }
             </li> for s in sessions]}
         </ul>
-    </div>;
+    </section>;
 }

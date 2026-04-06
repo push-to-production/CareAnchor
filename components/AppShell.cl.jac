@@ -38,6 +38,7 @@ def clear_auth_cookie() -> None {
 
 import from .ChatWindow { ChatWindow }
 import from .CrisisBanner { CrisisBanner }
+import from .LandingPage { LandingPage }
 import from .LoginScreen { LoginScreen, format_phone }
 import from .SessionList { SessionList }
 import from .SessionPdf { build_session_pdf_attachment }
@@ -88,8 +89,19 @@ def build_pdf_chat_message(payload: dict, attachment: dict) -> dict {
     };
 }
 
+def current_path() -> str {
+    path = window.location.pathname;
+    return path if path != "" else "/";
+}
+
+def is_known_route(path: str) -> bool {
+    return path == "/" or path == "/login" or path == "/dashboard";
+}
+
 def:pub AppShell() -> JsxElement {
     has loggedIn: bool = false;
+    has authReady: bool = false;
+    has currentPath: str = current_path();
     has phoneNumber: str = "";
     has userId: str = "";
     has authToken: str = "";
@@ -104,6 +116,22 @@ def:pub AppShell() -> JsxElement {
     has localTranscript: list = [];
     has pastSessions: list = [];
     has showSessions: bool = False;
+
+    def syncRoute() -> None {
+        currentPath = current_path();
+    }
+
+    def routeTo(path: str, replace: bool = false) -> None {
+        target = path if path != "" else "/";
+        if currentPath == target and window.location.pathname == target { return; }
+        if replace {
+            window.history.replaceState(None, "", target);
+        } else {
+            window.history.pushState(None, "", target);
+        }
+        currentPath = target;
+        window.scrollTo({"top": 0, "left": 0});
+    }
 
     async def fetchSessions(phone: str) -> None {
         try {
@@ -166,16 +194,31 @@ def:pub AppShell() -> JsxElement {
         booting = False;
     }
 
-    def handleLogin(payload: dict) -> None {
-        user = payload["user"];
-        token = payload["token"] if "token" in payload else "";
+    def setAuthState(user: dict, token: str) -> None {
         phoneNumber = user["phone_number"];
         userId = user["user_id"];
         authToken = token;
         if token != "" { set_auth_cookie(token); }
         loggedIn = true;
-        fetchSessions(user["phone_number"]);
-        showSessions = true;
+    }
+
+    def handleLogin(payload: dict) -> None {
+        user = payload["user"];
+        token = payload["token"] if "token" in payload else "";
+        setAuthState(user, token);
+        showSessions = false;
+        pastSessions = [];
+        bootstrap(user["phone_number"]);
+        routeTo("/dashboard", true);
+    }
+
+    def handleRestoreLogin(payload: dict) -> None {
+        user = payload["user"];
+        token = payload["token"] if "token" in payload else "";
+        setAuthState(user, token);
+        showSessions = false;
+        pastSessions = [];
+        bootstrap(user["phone_number"]);
     }
 
     async def handleLogout() -> None {
@@ -195,17 +238,21 @@ def:pub AppShell() -> JsxElement {
         localTranscript = [];
         pastSessions = [];
         showSessions = false;
+        routeTo("/login", true);
     }
 
     async def restoreSession() -> None {
         token = get_auth_cookie();
-        if token == "" { return; }
+        if token == "" {
+            authReady = true;
+            return;
+        }
         try {
             result = root spawn get_user_by_token(token=token);
             if result.reports.length > 0 {
                 payload = result.reports[0];
                 if "user" in payload {
-                    handleLogin({"user": payload["user"], "token": token});
+                    handleRestoreLogin({"user": payload["user"], "token": token});
                 } else {
                     clear_auth_cookie();
                 }
@@ -213,9 +260,30 @@ def:pub AppShell() -> JsxElement {
         } except Exception as e {
             clear_auth_cookie();
         }
+        authReady = true;
     }
 
+    useEffect(lambda -> None {
+        syncRoute();
+        window.onpopstate = lambda _event: any -> None { syncRoute(); };
+    }, []);
+
     useEffect(lambda -> None { restoreSession(); }, []);
+
+    useEffect(lambda -> None {
+        if not authReady { return; }
+        if not is_known_route(currentPath) {
+            routeTo("/dashboard" if loggedIn else "/", true);
+            return;
+        }
+        if loggedIn and currentPath == "/login" {
+            routeTo("/dashboard", true);
+            return;
+        }
+        if not loggedIn and currentPath == "/dashboard" {
+            routeTo("/login", true);
+        }
+    }, [authReady, loggedIn, currentPath]);
 
     async def send_message() -> None {
         if sending or booting or draft.trim() == "" or sessionId == "" { return; }
@@ -311,8 +379,35 @@ def:pub AppShell() -> JsxElement {
         sending = False;
     }
 
+    if currentPath == "/" {
+        return <LandingPage
+            onGetStarted={lambda -> None { routeTo("/login"); }}
+            onSignIn={lambda -> None { routeTo("/login"); }}
+        />;
+    }
+
+    if currentPath == "/login" {
+        if loggedIn {
+            return <div className="route-loading">
+                <div className="route-loading__card panel panel--glass">Opening dashboard...</div>
+            </div>;
+        }
+        return <LoginScreen
+            onLogin={handleLogin}
+            onGoHome={lambda -> None { routeTo("/"); }}
+        />;
+    }
+
+    if not authReady {
+        return <div className="route-loading">
+            <div className="route-loading__card panel panel--glass">Opening AnchorCare...</div>
+        </div>;
+    }
+
     if not loggedIn {
-        return <LoginScreen onLogin={handleLogin} />;
+        return <div className="route-loading">
+            <div className="route-loading__card panel panel--glass">Redirecting to sign in...</div>
+        </div>;
     }
 
     if showSessions {
@@ -328,6 +423,19 @@ def:pub AppShell() -> JsxElement {
                 </div>
             </header>
             <div className="session-chooser__body">
+                <section className="session-chooser__hero panel panel--glass">
+                    <div className="session-chooser__hero-copy">
+                        <div className="panel__eyebrow">Care coordination workspace</div>
+                        <h1 className="session-chooser__title">Sessions</h1>
+                        <p className="session-chooser__subtitle">Review previous conversations and continue care coordination.</p>
+                    </div>
+                    <div className="session-chooser__hero-meta">
+                        <div className="session-chooser__stat">
+                            <span>Saved sessions</span>
+                            <strong>{String(pastSessions.length)}</strong>
+                        </div>
+                    </div>
+                </section>
                 <SessionList
                     sessions={pastSessions}
                     currentSessionId={sessionId}
